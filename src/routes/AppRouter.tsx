@@ -1,18 +1,18 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { AppShell } from '../views/components/AppShell';
-import { DashboardPage } from '../views/pages/DashboardPage';
-import { SubscriptionListPage } from '../views/pages/SubscriptionListPage';
-import { SubscriptionDetailPage } from '../views/pages/SubscriptionDetailPage';
-import { CancelAssistantPage } from '../views/pages/CancelAssistantPage';
-import { AnalyticsPage } from '../views/pages/AnalyticsPage';
-import { SettingsPage } from '../views/pages/SettingsPage';
-import { AuthPage } from '../views/pages/AuthPage';
+import { AppShell } from '../components/layout/AppShell';
 import { ProtectedRoute } from './ProtectedRoute';
+import { DashboardView } from '../pages/Dashboard';
+import { SubscriptionListView } from '../pages/SubscriptionList';
+import { SubscriptionDetailView } from '../pages/SubscriptionDetail';
+import { CancelAssistantView } from '../pages/CancelAssistant';
+import { AnalyticsView } from '../pages/Analytics';
+import { SettingsView } from '../pages/Settings';
+import { AuthView } from '../pages/Auth';
 
 const router = createBrowserRouter([
   {
     path: '/auth',
-    element: <AuthPage />,
+    element: <AuthView />,
   },
   {
     path: '/',
@@ -22,12 +22,12 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
-      { index: true, element: <DashboardPage /> },
-      { path: 'subscriptions', element: <SubscriptionListPage /> },
-      { path: 'subscriptions/:id', element: <SubscriptionDetailPage /> },
-      { path: 'cancel-assistant', element: <CancelAssistantPage /> },
-      { path: 'analytics', element: <AnalyticsPage /> },
-      { path: 'settings', element: <SettingsPage /> },
+      { index: true, element: <DashboardView /> },
+      { path: 'subscriptions', element: <SubscriptionListView /> },
+      { path: 'subscriptions/:id', element: <SubscriptionDetailView /> },
+      { path: 'cancel-assistant', element: <CancelAssistantView /> },
+      { path: 'analytics', element: <AnalyticsView /> },
+      { path: 'settings', element: <SettingsView /> },
     ],
   },
 ]);
