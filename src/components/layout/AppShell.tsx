@@ -4,6 +4,7 @@ import { clsx } from 'clsx';
 import {
   LayoutDashboard,
   CreditCard,
+  Heart,
   XCircle,
   BarChart3,
   Settings,
@@ -22,6 +23,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { label: 'Dashboard', to: '/', icon: <LayoutDashboard className="w-5 h-5" /> },
   { label: 'Subscriptions', to: '/subscriptions', icon: <CreditCard className="w-5 h-5" /> },
+  { label: 'Favourites', to: '/favourites', icon: <Heart className="w-5 h-5" /> },
   { label: 'Cancel Assistant', to: '/cancel-assistant', icon: <XCircle className="w-5 h-5" /> },
   { label: 'Analytics', to: '/analytics', icon: <BarChart3 className="w-5 h-5" /> },
   { label: 'Settings', to: '/settings', icon: <Settings className="w-5 h-5" /> },
@@ -143,7 +145,7 @@ function BottomNav({ onMenuToggle }: BottomNavProps) {
   const items = [
     { label: 'Home', to: '/', icon: <LayoutDashboard className="w-5 h-5" /> },
     { label: 'Subs', to: '/subscriptions', icon: <CreditCard className="w-5 h-5" /> },
-    { label: 'Cancel', to: '/cancel-assistant', icon: <XCircle className="w-5 h-5" /> },
+    { label: 'Favs', to: '/favourites', icon: <Heart className="w-5 h-5" /> },
     { label: 'Analytics', to: '/analytics', icon: <BarChart3 className="w-5 h-5" /> },
     { label: 'Settings', to: '/settings', icon: <Settings className="w-5 h-5" /> },
   ];

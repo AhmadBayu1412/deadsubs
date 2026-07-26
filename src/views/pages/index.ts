@@ -4,6 +4,7 @@
 export { DashboardView } from '../../pages/Dashboard';
 export { SubscriptionListView } from '../../pages/SubscriptionList';
 export { SubscriptionDetailView } from '../../pages/SubscriptionDetail';
+export { FavouritesView } from '../../pages/Favourites';
 export { CancelAssistantView } from '../../pages/CancelAssistant';
 export { AnalyticsView } from '../../pages/Analytics';
 export { SettingsView } from '../../pages/Settings';

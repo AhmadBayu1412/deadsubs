@@ -4,6 +4,7 @@ import { ProtectedRoute } from './ProtectedRoute';
 import { DashboardView } from '../pages/Dashboard';
 import { SubscriptionListView } from '../pages/SubscriptionList';
 import { SubscriptionDetailView } from '../pages/SubscriptionDetail';
+import { FavouritesView } from '../pages/Favourites';
 import { CancelAssistantView } from '../pages/CancelAssistant';
 import { AnalyticsView } from '../pages/Analytics';
 import { SettingsView } from '../pages/Settings';
@@ -25,6 +26,7 @@ const router = createBrowserRouter([
       { index: true, element: <DashboardView /> },
       { path: 'subscriptions', element: <SubscriptionListView /> },
       { path: 'subscriptions/:id', element: <SubscriptionDetailView /> },
+      { path: 'favourites', element: <FavouritesView /> },
       { path: 'cancel-assistant', element: <CancelAssistantView /> },
       { path: 'analytics', element: <AnalyticsView /> },
       { path: 'settings', element: <SettingsView /> },
