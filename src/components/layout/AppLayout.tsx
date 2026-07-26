@@ -1,5 +1,8 @@
-import { type ReactNode, useState } from 'react';
-import { NavLink, useLocation, useOutlet } from 'react-router-dom';
+// Phase 5 — Layout: AppLayout
+// Composes Header (mobile), Sidebar (desktop), Main, Footer, and BottomNav (mobile)
+// into a single responsive shell that wraps all authenticated routes.
+import { useState } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
 import { clsx } from 'clsx';
 import {
   LayoutDashboard,
@@ -9,15 +12,18 @@ import {
   BarChart3,
   Settings,
   LogOut,
-  Menu,
-  X,
 } from 'lucide-react';
+import { Header } from './Header';
+import { Footer } from './Footer';
+import { Main } from './Main';
 import { useAuthStore } from '../../viewmodels/authStore';
+
+// ── Sidebar ─────────────────────────────────────────────────────────────────
 
 interface NavItem {
   label: string;
   to: string;
-  icon: ReactNode;
+  icon: React.ReactNode;
 }
 
 const navItems: NavItem[] = [
@@ -29,40 +35,13 @@ const navItems: NavItem[] = [
   { label: 'Settings', to: '/settings', icon: <Settings className="w-5 h-5" /> },
 ];
 
-function DeadSubsLogo() {
-  return (
-    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="28" height="28" rx="8" fill="#DC2626" />
-      <path
-        d="M8 10L14 16L20 10"
-        stroke="white"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M8 18L14 12L20 18"
-        stroke="white"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        opacity="0.5"
-      />
-    </svg>
-  );
-}
-
-interface SidebarProps {
-  open: boolean;
-  onClose: () => void;
-}
-
-function Sidebar({ open, onClose }: SidebarProps) {
+function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { user, logout } = useAuthStore();
   const location = useLocation();
 
   return (
     <>
+      {/* Mobile backdrop */}
       {open && (
         <div
           className="fixed inset-0 bg-black/30 z-30 lg:hidden"
@@ -70,27 +49,29 @@ function Sidebar({ open, onClose }: SidebarProps) {
         />
       )}
 
+      {/* Desktop sidebar */}
       <aside
         className={clsx(
           'fixed lg:static inset-y-0 left-0 z-40 w-60 bg-surface border-r border-border flex flex-col',
-          'transform transition-transform duration-250 lg:transform-none',
-          open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+          'hidden lg:flex',
+          // Transitions handled by visibility — avoids animation jank during SSR
         )}
+        aria-label="Main navigation"
       >
+        {/* Logo */}
         <div className="flex items-center gap-3 px-5 py-5 border-b border-border">
-          <DeadSubsLogo />
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <rect width="28" height="28" rx="8" fill="#DC2626" />
+            <path d="M8 10L14 16L20 10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M8 18L14 12L20 18" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.5" />
+          </svg>
           <div>
-            <h1 className="text-sm font-bold text-primary leading-none">DeadSubs</h1>
+            <p className="text-sm font-bold text-primary leading-none">DeadSubs</p>
             <p className="text-xs text-secondary mt-0.5">Kill unwanted subs</p>
           </div>
-          <button
-            className="ml-auto lg:hidden p-1 rounded-lg text-secondary hover:bg-border/50 cursor-pointer"
-            onClick={onClose}
-          >
-            <X className="w-5 h-5" />
-          </button>
         </div>
 
+        {/* Nav links */}
         <nav className="flex-1 px-3 py-4 space-y-1">
           {navItems.map((item) => {
             const isActive =
@@ -101,12 +82,11 @@ function Sidebar({ open, onClose }: SidebarProps) {
               <NavLink
                 key={item.to}
                 to={item.to}
-                onClick={onClose}
                 className={clsx(
                   'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150',
                   isActive
                     ? 'bg-accent-blue/10 text-accent-blue'
-                    : 'text-secondary hover:bg-border/50 hover:text-primary'
+                    : 'text-secondary hover:bg-border/50 hover:text-primary',
                 )}
               >
                 {item.icon}
@@ -116,12 +96,11 @@ function Sidebar({ open, onClose }: SidebarProps) {
           })}
         </nav>
 
+        {/* User / sign out */}
         <div className="px-3 py-4 border-t border-border">
-          <div className="px-3 py-2 mb-1">
-            <p className="text-xs font-medium text-primary truncate">
-              {user?.email ?? 'Guest'}
-            </p>
-          </div>
+          <p className="px-3 py-2 text-xs font-medium text-primary truncate">
+            {user?.email ?? 'Guest'}
+          </p>
           <button
             onClick={logout}
             className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm text-secondary hover:bg-border/50 hover:text-primary transition-colors cursor-pointer"
@@ -135,11 +114,9 @@ function Sidebar({ open, onClose }: SidebarProps) {
   );
 }
 
-interface BottomNavProps {
-  onMenuToggle: () => void;
-}
+// ── Bottom Nav (mobile only) ────────────────────────────────────────────────
 
-function BottomNav({ onMenuToggle }: BottomNavProps) {
+function BottomNav() {
   const location = useLocation();
 
   const items = [
@@ -151,14 +128,11 @@ function BottomNav({ onMenuToggle }: BottomNavProps) {
   ];
 
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-30 bg-surface border-t border-border lg:hidden">
+    <nav
+      className="fixed bottom-0 inset-x-0 z-30 bg-surface border-t border-border lg:hidden"
+      aria-label="Mobile navigation"
+    >
       <div className="flex items-center">
-        <button
-          onClick={onMenuToggle}
-          className="flex flex-col items-center justify-center px-4 py-3 text-secondary hover:text-primary transition-colors cursor-pointer"
-        >
-          <Menu className="w-5 h-5" />
-        </button>
         {items.map((item) => {
           const isActive =
             item.to === '/'
@@ -169,12 +143,12 @@ function BottomNav({ onMenuToggle }: BottomNavProps) {
               key={item.to}
               to={item.to}
               className={clsx(
-                'flex-1 flex flex-col items-center justify-center py-3 text-xs font-medium transition-colors',
-                isActive ? 'text-accent-blue' : 'text-secondary'
+                'flex-1 flex flex-col items-center justify-center py-2.5 text-xs font-medium transition-colors',
+                isActive ? 'text-accent-blue' : 'text-secondary',
               )}
             >
               {item.icon}
-              <span className="mt-1">{item.label}</span>
+              <span className="mt-0.5">{item.label}</span>
             </NavLink>
           );
         })}
@@ -183,19 +157,20 @@ function BottomNav({ onMenuToggle }: BottomNavProps) {
   );
 }
 
-export function AppShell() {
+// ── AppLayout ────────────────────────────────────────────────────────────────
+
+export function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const outlet = useOutlet();
 
   return (
     <div className="flex min-h-screen bg-bg">
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div className="flex-1 flex flex-col min-w-0">
-        <main className="flex-1 p-4 lg:p-8 pb-24 lg:pb-8 overflow-auto">
-          <div className="max-w-5xl mx-auto">{outlet}</div>
-        </main>
+        <Header onMenuToggle={() => setSidebarOpen(true)} />
+        <Main />
+        <Footer />
       </div>
-      <BottomNav onMenuToggle={() => setSidebarOpen(true)} />
+      <BottomNav />
     </div>
   );
 }

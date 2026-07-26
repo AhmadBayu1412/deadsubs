@@ -1,5 +1,5 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { AppShell } from '../components/layout/AppShell';
+import { AppLayout } from '../components/layout/AppLayout';
 import { ProtectedRoute } from './ProtectedRoute';
 import { DashboardView } from '../pages/Dashboard';
 import { SubscriptionListView } from '../pages/SubscriptionList';
@@ -19,7 +19,7 @@ const router = createBrowserRouter([
     path: '/',
     element: (
       <ProtectedRoute>
-        <AppShell />
+        <AppLayout />
       </ProtectedRoute>
     ),
     children: [
