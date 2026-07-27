@@ -32,6 +32,7 @@ export interface SubscriptionListViewModel {
   clearOmdbResults: () => void;
   removeSubscription: (id: string) => void;
   navigateToDetail: (id: string) => void;
+  openAddModal: () => void;
 }
 
 export function useSubscriptionListViewModel(): SubscriptionListViewModel {
@@ -41,6 +42,7 @@ export function useSubscriptionListViewModel(): SubscriptionListViewModel {
   const subscriptions = useSubscriptionStore((s) => s.subscriptions);
   const fetchAll = useSubscriptionStore((s) => s.fetchAll);
   const loading = useSubscriptionStore((s) => s.loading);
+  const openAddModal = useSubscriptionStore((s) => s.openAddModal);
   const remove = useSubscriptionStore((s) => s.remove);
 
   // Load on mount
@@ -137,5 +139,6 @@ export function useSubscriptionListViewModel(): SubscriptionListViewModel {
     clearOmdbResults,
     removeSubscription,
     navigateToDetail,
+    openAddModal,
   };
 }

@@ -22,3 +22,4 @@ export {
   deriveMovieCardState,
   type MovieCardState,
 } from '../../components/subscriptions/MovieCardModel';
+export { AddSubscriptionModal } from '../../components/AddSubscriptionModal';

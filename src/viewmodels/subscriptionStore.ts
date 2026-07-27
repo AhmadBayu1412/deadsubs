@@ -120,6 +120,9 @@ interface SubscriptionState {
   loading: boolean;
   error: string | null;
   initialized: boolean;
+  addModalOpen: boolean;
+  openAddModal: () => void;
+  closeAddModal: () => void;
   fetchAll: () => Promise<void>;
   add: (data: Omit<Subscription, 'id' | 'createdAt' | 'updatedAt'>) => Promise<string>;
   update: (id: string, data: Partial<Subscription>) => Promise<void>;
@@ -127,6 +130,7 @@ interface SubscriptionState {
   clearAll: () => Promise<void>;
   importData: (data: Subscription[]) => Promise<void>;
   toggleFavourite: (id: string) => Promise<void>;
+  cancelSubscription: (id: string) => Promise<void>;
 }
 
 export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
@@ -134,6 +138,9 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
   loading: false,
   error: null,
   initialized: false,
+  addModalOpen: false,
+  openAddModal: () => set({ addModalOpen: true }),
+  closeAddModal: () => set({ addModalOpen: false }),
 
   fetchAll: async () => {
     set({ loading: true, error: null });
@@ -207,6 +214,38 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
       set((state) => ({
         subscriptions: state.subscriptions.map((s) =>
           s.id === id ? { ...s, isFavourited: !s.isFavourited } : s,
+        ),
+        error: result.error.message,
+      }));
+    }
+  },
+
+  cancelSubscription: async (id) => {
+    const sub = get().subscriptions.find((s) => s.id === id);
+    if (!sub) return;
+
+    const now = new Date().toISOString();
+    set((state) => ({
+      subscriptions: state.subscriptions.map((s) =>
+        s.id === id
+          ? {
+              ...s,
+              status: 'cancelled',
+              cancelTargetDate: now,
+              updatedAt: now,
+            }
+          : s,
+      ),
+    }));
+
+    const result = await favSvc.updateSubscription(id, {
+      status: 'cancelled',
+      cancelTargetDate: now,
+    });
+    if (!result.ok) {
+      set((state) => ({
+        subscriptions: state.subscriptions.map((s) =>
+          s.id === id ? sub : s,
         ),
         error: result.error.message,
       }));

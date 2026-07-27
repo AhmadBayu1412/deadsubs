@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { useAuthStore } from '../../viewmodels/authStore';
+import { useSubscriptionStore } from '../../viewmodels/subscriptionStore';
 
 // ── Logo ─────────────────────────────────────────────────────────────────────
 
@@ -224,6 +225,7 @@ interface HeaderProps {
 
 export function Header({ onMenuToggle }: HeaderProps) {
   const { user, logout } = useAuthStore();
+  const openAddModal = useSubscriptionStore((s) => s.openAddModal);
   const [searchValue, setSearchValue] = useState('');
   const [profileOpen, setProfileOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
@@ -285,6 +287,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
               variant="primary"
               size="sm"
               className="gap-1.5"
+              onClick={openAddModal}
               aria-label="Add new subscription"
             >
               <Plus className="w-4 h-4" />

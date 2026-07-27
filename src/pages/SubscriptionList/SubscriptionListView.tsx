@@ -3,7 +3,7 @@
 import React, { useState, useCallback } from 'react';
 import { Search, Plus, X, SlidersHorizontal } from 'lucide-react';
 import { PageTitle } from '../../components/ui/PageTitle';
-import { SubscriptionCard } from '../../views/components';
+import { SubscriptionCard, AddSubscriptionModal } from '../../views/components';
 import { Button } from '../../components/ui/Button';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { EmptyState } from '../../components/ui/EmptyState';
@@ -201,7 +201,7 @@ export function SubscriptionListView() {
         title="Subscriptions"
         description={`${state.totalCount} total`}
         action={
-          <Button variant="primary" size="md">
+          <Button variant="primary" size="md" onClick={vm.openAddModal}>
             <Plus className="w-4 h-4" />
             Add subscription
           </Button>
@@ -296,6 +296,7 @@ export function SubscriptionListView() {
           ))}
         </div>
       )}
+      <AddSubscriptionModal />
     </div>
   );
 }
