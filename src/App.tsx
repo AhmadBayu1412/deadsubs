@@ -3,6 +3,7 @@ import { Toaster } from 'react-hot-toast';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AppRouter } from './routes/AppRouter';
 import { useAuthStore } from './viewmodels/authStore';
+import { AppErrorBoundary } from './components/AppErrorBoundary';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -25,34 +26,36 @@ function AuthInitializer({ children }: { children: React.ReactNode }) {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthInitializer>
-        <AppRouter />
-        <Toaster
-          position="bottom-right"
-          toastOptions={{
-            duration: 4000,
-            style: {
-              background: '#1A1916',
-              color: '#F8F7F4',
-              borderRadius: '10px',
-              fontSize: '14px',
-              fontFamily: 'Inter, system-ui, sans-serif',
-            },
-            success: {
-              iconTheme: {
-                primary: '#16A34A',
-                secondary: '#F8F7F4',
+      <AppErrorBoundary>
+        <AuthInitializer>
+          <AppRouter />
+          <Toaster
+            position="bottom-right"
+            toastOptions={{
+              duration: 4000,
+              style: {
+                background: '#1A1916',
+                color: '#F8F7F4',
+                borderRadius: '10px',
+                fontSize: '14px',
+                fontFamily: 'Inter, system-ui, sans-serif',
               },
-            },
-            error: {
-              iconTheme: {
-                primary: '#DC2626',
-                secondary: '#F8F7F4',
+              success: {
+                iconTheme: {
+                  primary: '#16A34A',
+                  secondary: '#F8F7F4',
+                },
               },
-            },
-          }}
-        />
-      </AuthInitializer>
+              error: {
+                iconTheme: {
+                  primary: '#DC2626',
+                  secondary: '#F8F7F4',
+                },
+              },
+            }}
+          />
+        </AuthInitializer>
+      </AppErrorBoundary>
     </QueryClientProvider>
   );
 }

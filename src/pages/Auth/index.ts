@@ -1,3 +1,12 @@
-export { type PlaceholderModel as AuthModel } from './AuthModel';
-export { type PlaceholderViewModel as useAuthViewModel } from './useAuthViewModel';
+// Phase 7 — Auth barrel
+export {
+  type SignInInput,
+  type SignUpInput,
+  type AuthMode,
+  type AuthState,
+} from './AuthModel';
+export {
+  type AuthViewModel,
+  useAuthViewModel,
+} from './useAuthViewModel';
 export { AuthView } from './AuthView';

@@ -24,6 +24,7 @@ export interface Subscription {
   status: Status;
   notes?: string;
   cancelTargetDate?: string; // ISO date
+  isFavourited: boolean;
   createdAt: string;
   updatedAt: string;
 }

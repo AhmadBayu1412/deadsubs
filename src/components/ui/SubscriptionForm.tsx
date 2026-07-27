@@ -63,6 +63,7 @@ export function SubscriptionForm({
       renewalDate: new Date(data.renewalDate).toISOString(),
       status: subscription?.status ?? 'active',
       notes: data.notes,
+      isFavourited: subscription?.isFavourited ?? false,
     });
   });
 

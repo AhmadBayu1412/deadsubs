@@ -1,4 +1,4 @@
-// Phase 2 — Favourites Feature barrel
-export { type PlaceholderModel as FavouritesModel } from './FavouritesModel';
-export { type PlaceholderViewModel as useFavouritesViewModel } from './useFavouritesViewModel';
+// Phase 7 — Favourites barrel
+export { type FavouritesState } from './FavouritesModel';
+export { type FavouritesViewModel, useFavouritesViewModel } from './useFavouritesViewModel';
 export { FavouritesView } from './FavouritesView';
