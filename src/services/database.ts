@@ -1,15 +1,24 @@
 import Dexie, { type EntityTable } from 'dexie';
 import type { Subscription } from '../models/subscription';
+import type { AppNotification } from '../types/notification';
 
 const db = new Dexie('DeadSubsDB') as Dexie & {
   subscriptions: EntityTable<Subscription, 'id'>;
+  notifications: EntityTable<AppNotification, 'id'>;
 };
 
 db.version(1).stores({
   subscriptions: 'id, name, category, status, renewalDate, createdAt',
 });
 
+db.version(2).stores({
+  subscriptions: 'id, name, category, status, renewalDate, createdAt',
+  notifications: 'id, type, subscriptionId, read, createdAt',
+});
+
 export { db };
+
+// ── Subscriptions ──────────────────────────────────────────────────────────────
 
 export async function getAllSubscriptions(): Promise<Subscription[]> {
   return db.subscriptions.orderBy('renewalDate').toArray();
@@ -65,4 +74,35 @@ export async function exportAllData(): Promise<Subscription[]> {
 
 export async function importData(subscriptions: Subscription[]): Promise<void> {
   await db.subscriptions.bulkPut(subscriptions);
+}
+
+// ── Notifications ────────────────────────────────────────────────────────────────
+
+export async function getAllNotifications(): Promise<AppNotification[]> {
+  return db.notifications.orderBy('createdAt').reverse().toArray();
+}
+
+export async function addNotification(
+  data: Omit<AppNotification, 'id' | 'createdAt' | 'read'>
+): Promise<string> {
+  const id = crypto.randomUUID();
+  const now = new Date().toISOString();
+  await db.notifications.add({ ...data, id, read: false, createdAt: now });
+  return id;
+}
+
+export async function markNotificationRead(id: string): Promise<void> {
+  await db.notifications.update(id, { read: true });
+}
+
+export async function markAllNotificationsRead(): Promise<void> {
+  await db.notifications.where('read').equals(0).modify({ read: true });
+}
+
+export async function deleteNotification(id: string): Promise<void> {
+  await db.notifications.delete(id);
+}
+
+export async function clearAllNotifications(): Promise<void> {
+  await db.notifications.clear();
 }

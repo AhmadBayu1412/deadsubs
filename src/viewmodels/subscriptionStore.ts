@@ -4,6 +4,7 @@
 import { create } from 'zustand';
 import type { Subscription } from '../models/subscription';
 import * as favSvc from '../services/favouriteService';
+import * as notificationSvc from '../services/notificationService';
 
 const SEEDED_KEY = 'deadsubs_seeded_v1';
 
@@ -159,8 +160,12 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
       set({ error: result.error.message });
       throw result.error;
     }
+    const { id } = result.data;
+    notificationSvc.createNotification(
+      notificationSvc.makeSubscriptionAddedNotification(id, data.name),
+    );
     await get().fetchAll();
-    return result.data.id;
+    return id;
   },
 
   update: async (id, data) => {
@@ -242,6 +247,11 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
       status: 'cancelled',
       cancelTargetDate: now,
     });
+    if (result.ok) {
+      notificationSvc.createNotification(
+        notificationSvc.makeSubscriptionCancelledNotification(id, sub.name),
+      );
+    }
     if (!result.ok) {
       set((state) => ({
         subscriptions: state.subscriptions.map((s) =>

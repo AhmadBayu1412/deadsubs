@@ -1,13 +1,13 @@
 // Phase 7 — Dashboard Model
-// Domain types and derived state for the Dashboard page.
-// No side-effects here — pure transformations of Subscription data.
+// Derives dashboard state from shared analytics service + subscription data.
 import type { Subscription } from '../../models/subscription';
-
-// ── Derived aggregates ────────────────────────────────────────────────────────
+import {
+  computeAnalytics,
+} from '../../services/analyticsService';
 
 export interface DashboardStats {
-  totalMonthly: number; // in cents
-  totalYearly: number;  // in cents
+  totalMonthly: number; // dollars
+  totalYearly: number;  // dollars
   activeCount: number;
   upcomingRenewals: Subscription[];
   overdueCount: number;
@@ -15,7 +15,7 @@ export interface DashboardStats {
 
 export interface SpendingByCategory {
   category: string;
-  amount: number; // monthly in cents
+  amount: number; // dollars
   percentage: number;
 }
 
@@ -26,35 +26,33 @@ export interface DashboardState {
   isEmpty: boolean;
 }
 
-// ── Pure derivation ───────────────────────────────────────────────────────────
+const CATEGORY_LABELS: Record<string, string> = {
+  streaming: 'Streaming',
+  software: 'Software',
+  fitness: 'Fitness',
+  news: 'News',
+  gaming: 'Gaming',
+  music: 'Music',
+  cloud: 'Cloud',
+  food: 'Food',
+  other: 'Other',
+};
 
 export function deriveDashboardState(
   subscriptions: Subscription[],
   isLoading: boolean,
 ): DashboardState {
+  const metrics = computeAnalytics(subscriptions);
+
   const active = subscriptions.filter(
     (s) => s.status === 'active' || s.status === 'pending_cancel',
   );
 
-  const totalMonthly = active.reduce((sum, s) => {
-    if (s.billingCycle === 'monthly') return sum + s.cost;
-    if (s.billingCycle === 'yearly') return sum + s.cost / 12;
-    if (s.billingCycle === 'weekly') return sum + s.cost * 4.33;
-    return sum;
-  }, 0);
-
-  const totalYearly = active.reduce((sum, s) => {
-    if (s.billingCycle === 'monthly') return sum + s.cost * 12;
-    if (s.billingCycle === 'yearly') return sum + s.cost;
-    if (s.billingCycle === 'weekly') return sum + s.cost * 52;
-    return sum;
-  }, 0);
-
+  // Include pending_cancel in upcoming renewals (same as Dashboard's previous behavior)
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const upcomingRenewals = [...subscriptions]
-    .filter((s) => s.status === 'active' || s.status === 'pending_cancel')
+  const upcomingRenewals = [...active]
     .filter((s) => {
       const renewal = new Date(s.renewalDate);
       renewal.setHours(0, 0, 0, 0);
@@ -69,7 +67,7 @@ export function deriveDashboardState(
         new Date(b.renewalDate).getTime(),
     );
 
-  const overdueCount = subscriptions.filter((s) => {
+  const overdueCount = active.filter((s) => {
     const renewal = new Date(s.renewalDate);
     renewal.setHours(0, 0, 0, 0);
     const diffDays = Math.ceil(
@@ -78,36 +76,19 @@ export function deriveDashboardState(
     return diffDays < 0;
   }).length;
 
-  // Spending by category
-  const categoryMap = new Map<string, number>();
-  for (const s of active) {
-    const monthly =
-      s.billingCycle === 'monthly'
-        ? s.cost
-        : s.billingCycle === 'yearly'
-          ? s.cost / 12
-          : s.billingCycle === 'weekly'
-            ? s.cost * 4.33
-            : s.cost;
-    categoryMap.set(s.category, (categoryMap.get(s.category) ?? 0) + monthly);
-  }
-
-  const spendingByCategory: SpendingByCategory[] = Array.from(
-    categoryMap.entries(),
-  )
-    .map(([category, amount]) => ({ category, amount, percentage: 0 }))
+  // Map analytics category data to dashboard format (dollars, not cents)
+  const spendingByCategory: SpendingByCategory[] = metrics.byCategory
+    .map((item) => ({
+      category: CATEGORY_LABELS[item.category] ?? item.category,
+      amount: item.monthlyTotal / 100,
+      percentage: item.percentage,
+    }))
     .sort((a, b) => b.amount - a.amount);
-
-  if (totalMonthly > 0) {
-    for (const cat of spendingByCategory) {
-      cat.percentage = Math.round((cat.amount / totalMonthly) * 100);
-    }
-  }
 
   return {
     stats: {
-      totalMonthly,
-      totalYearly,
+      totalMonthly: metrics.totalMonthly / 100,
+      totalYearly: metrics.totalYearly / 100,
       activeCount: active.length,
       upcomingRenewals,
       overdueCount,
@@ -117,8 +98,6 @@ export function deriveDashboardState(
     isEmpty: subscriptions.length === 0,
   };
 }
-
-// ── Display helpers ────────────────────────────────────────────────────────────
 
 export function formatCentsToDollar(cents: number): string {
   const dollars = cents / 100;

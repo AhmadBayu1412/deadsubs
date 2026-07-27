@@ -1,5 +1,5 @@
 // Phase 13 — Analytics ViewModel
-// Derives analytics state from the subscription store.
+// Reads subscription data from the store and derives analytics.
 import { useEffect, useMemo } from 'react';
 import { useSubscriptionStore } from '../../viewmodels/subscriptionStore';
 import { type AnalyticsState, deriveAnalyticsState } from './AnalyticsModel';

@@ -1,13 +1,33 @@
-// Phase 11 — Settings View
+// Phase 14 — Settings View
 // User account info, data management, and sign-out.
+import { useState } from 'react';
 import { User, Trash2, LogOut, Info } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { PageTitle } from '../../components/ui/PageTitle';
 import { Button } from '../../components/ui/Button';
+import { ConfirmDialog } from '../../components/ui/Modal';
 import { useSettingsViewModel } from './useSettingsViewModel';
+
+const CONFIRM_PHRASE = 'delete all data';
 
 export function SettingsView() {
   const vm = useSettingsViewModel();
-  const { state } = vm;
+  const [confirmValue, setConfirmValue] = useState('');
+
+  const handleClearConfirm = async () => {
+    if (confirmValue.trim().toLowerCase() !== CONFIRM_PHRASE.toLowerCase()) {
+      toast.error('Confirmation phrase does not match.');
+      return;
+    }
+    await vm.handleClearAllData();
+    toast.success('All data has been cleared.');
+    setConfirmValue('');
+  };
+
+  const handleDialogClose = () => {
+    vm.clearDialog.onClose();
+    setConfirmValue('');
+  };
 
   return (
     <div className="space-y-6 max-w-lg">
@@ -22,12 +42,12 @@ export function SettingsView() {
         <div className="space-y-2">
           <div>
             <p className="text-xs text-secondary">Email</p>
-            <p className="text-sm text-primary">{state.user?.email ?? '—'}</p>
+            <p className="text-sm text-primary">{vm.state.user?.email ?? '—'}</p>
           </div>
           <div>
             <p className="text-xs text-secondary">User ID</p>
             <p className="text-xs text-secondary font-mono truncate">
-              {state.user?.uid ?? '—'}
+              {vm.state.user?.uid ?? '—'}
             </p>
           </div>
         </div>
@@ -59,17 +79,13 @@ export function SettingsView() {
         </h2>
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-sm font-medium text-primary">Clear all subscriptions</p>
+            <p className="text-sm font-medium text-primary">Clear all data</p>
             <p className="text-xs text-secondary mt-0.5">
-              Permanently deletes all subscription data from this device. This cannot be undone.
+              Permanently deletes all subscriptions, notifications, and cached data from this
+              device. Your account is preserved. This cannot be undone.
             </p>
           </div>
-          <Button
-            variant="danger"
-            size="sm"
-            onClick={vm.clearAllSubscriptions}
-            loading={state.isClearing}
-          >
+          <Button variant="danger" size="sm" onClick={vm.clearDialog.onOpen}>
             Clear data
           </Button>
         </div>
@@ -87,6 +103,23 @@ export function SettingsView() {
           Sign out
         </Button>
       </div>
+
+      {/* Confirmation dialog */}
+      <ConfirmDialog
+        open={vm.clearDialog.isOpen}
+        onClose={handleDialogClose}
+        onConfirm={handleClearConfirm}
+        title="Clear all data?"
+        message={
+          'This will permanently delete all subscriptions, notifications, and cached data from this device. ' +
+          'Your account will not be affected.'
+        }
+        confirmLabel="Clear all data"
+        confirmVariant="danger"
+        confirmText={CONFIRM_PHRASE}
+        confirmValue={confirmValue}
+        onConfirmChange={setConfirmValue}
+      />
     </div>
   );
 }

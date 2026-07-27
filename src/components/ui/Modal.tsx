@@ -100,7 +100,9 @@ interface ConfirmDialogProps {
   confirmLabel?: string;
   confirmVariant?: 'danger' | 'primary';
   loading?: boolean;
-  confirmText?: string; // User must type this to confirm
+  confirmText?: string;       // Phrase the user must type to enable confirm
+  readonly confirmValue?: string;      // Current input value
+  readonly onConfirmChange?: (v: string) => void; // Called on input change
 }
 
 export function ConfirmDialog({
@@ -113,21 +115,41 @@ export function ConfirmDialog({
   confirmVariant = 'danger',
   loading = false,
   confirmText,
+  confirmValue,
+  onConfirmChange,
 }: ConfirmDialogProps) {
+  const isConfirmed = !confirmText || confirmValue?.trim().toLowerCase() === confirmText.toLowerCase();
+
   return (
     <Modal open={open} onClose={onClose} title={title} size="sm">
       <div className="flex flex-col gap-4">
         <p className="text-sm text-secondary">{message}</p>
         {confirmText && (
-          <p className="text-xs text-secondary">
-            Type <strong className="text-primary">{confirmText}</strong> to confirm.
-          </p>
+          <div className="flex flex-col gap-1.5">
+            <p className="text-xs text-secondary">
+              Type <strong className="text-primary font-semibold">{confirmText}</strong> to confirm:
+            </p>
+            <input
+              type="text"
+              autoComplete="off"
+              spellCheck={false}
+              value={confirmValue ?? ''}
+              onChange={(e) => onConfirmChange?.(e.target.value)}
+              placeholder={confirmText}
+              className="w-full px-3 py-2 text-sm rounded-lg bg-bg border border-border text-primary placeholder:text-secondary/50 focus:outline-none focus:border-accent-red focus:ring-1 focus:ring-accent-red/30 transition-colors"
+            />
+          </div>
         )}
         <div className="flex justify-end gap-3">
           <Button variant="secondary" onClick={onClose} disabled={loading}>
             Cancel
           </Button>
-          <Button variant={confirmVariant} onClick={onConfirm} loading={loading}>
+          <Button
+            variant={confirmVariant}
+            onClick={onConfirm}
+            loading={loading}
+            disabled={!isConfirmed}
+          >
             {confirmLabel}
           </Button>
         </div>

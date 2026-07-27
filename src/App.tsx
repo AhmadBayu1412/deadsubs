@@ -4,6 +4,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AppRouter } from './routes/AppRouter';
 import { useAuthStore } from './viewmodels/authStore';
 import { AppErrorBoundary } from './components/AppErrorBoundary';
+import { useNotificationStore } from './viewmodels/notificationStore';
+import { checkAndGenerateRenewalNotifications } from './services/notificationService';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -23,37 +25,48 @@ function AuthInitializer({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function NotificationInitializer({ children }: { children: React.ReactNode }) {
+  const fetchAll = useNotificationStore((s) => s.fetchAll);
+  useEffect(() => {
+    checkAndGenerateRenewalNotifications();
+    fetchAll();
+  }, [fetchAll]);
+  return <>{children}</>;
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AppErrorBoundary>
         <AuthInitializer>
-          <AppRouter />
-          <Toaster
-            position="bottom-right"
-            toastOptions={{
-              duration: 4000,
-              style: {
-                background: '#1A1916',
-                color: '#F8F7F4',
-                borderRadius: '10px',
-                fontSize: '14px',
-                fontFamily: 'Inter, system-ui, sans-serif',
-              },
-              success: {
-                iconTheme: {
-                  primary: '#16A34A',
-                  secondary: '#F8F7F4',
+          <NotificationInitializer>
+            <AppRouter />
+            <Toaster
+              position="bottom-right"
+              toastOptions={{
+                duration: 4000,
+                style: {
+                  background: '#1A1916',
+                  color: '#F8F7F4',
+                  borderRadius: '10px',
+                  fontSize: '14px',
+                  fontFamily: 'Inter, system-ui, sans-serif',
                 },
-              },
-              error: {
-                iconTheme: {
-                  primary: '#DC2626',
-                  secondary: '#F8F7F4',
+                success: {
+                  iconTheme: {
+                    primary: '#16A34A',
+                    secondary: '#F8F7F4',
+                  },
                 },
-              },
-            }}
-          />
+                error: {
+                  iconTheme: {
+                    primary: '#DC2626',
+                    secondary: '#F8F7F4',
+                  },
+                },
+              }}
+            />
+          </NotificationInitializer>
         </AuthInitializer>
       </AppErrorBoundary>
     </QueryClientProvider>

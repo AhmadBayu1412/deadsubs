@@ -9,7 +9,10 @@ import { Skeleton } from '../../components/ui/Skeleton';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { Button } from '../../components/ui/Button';
 import { useDashboardViewModel } from './useDashboardViewModel';
-import { formatCentsToDollar } from './DashboardModel';
+
+function formatDollars(dollars: number): string {
+  return `$${dollars % 1 === 0 ? dollars.toFixed(0) : dollars.toFixed(2)}`;
+}
 
 // ── Stat Card ─────────────────────────────────────────────────────────────────
 
@@ -118,13 +121,13 @@ export function DashboardView() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           label="Monthly spend"
-          value={formatCentsToDollar(state.stats.totalMonthly)}
+          value={formatDollars(state.stats.totalMonthly)}
           sub="renewing monthly"
           icon={<TrendingDown className="w-5 h-5" />}
         />
         <StatCard
           label="Yearly spend"
-          value={formatCentsToDollar(state.stats.totalYearly)}
+          value={formatDollars(state.stats.totalYearly)}
           sub="projected annual"
           icon={<CreditCard className="w-5 h-5" />}
         />
