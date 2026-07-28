@@ -31,6 +31,7 @@ function createMockSubscription(
     notes: undefined,
     cancelTargetDate: undefined,
     isFavourited: false,
+    isRecurring: overrides.isRecurring ?? true,
     createdAt: now,
     updatedAt: now,
   };
@@ -45,6 +46,7 @@ const MOCK_SUBSCRIPTIONS: Subscription[] = [
     renewalDate: new Date(Date.now() + 12 * 86_400_000).toISOString(),
     notes: 'Shared plan — 4K UHD',
     isFavourited: true,
+    isRecurring: true,
   }),
   createMockSubscription({
     name: 'Spotify',
@@ -54,6 +56,7 @@ const MOCK_SUBSCRIPTIONS: Subscription[] = [
     renewalDate: new Date(Date.now() + 3 * 86_400_000).toISOString(),
     notes: 'Family plan',
     isFavourited: false,
+    isRecurring: true,
   }),
   createMockSubscription({
     name: 'GitHub Copilot',
@@ -63,6 +66,7 @@ const MOCK_SUBSCRIPTIONS: Subscription[] = [
     renewalDate: new Date(Date.now() - 2 * 86_400_000).toISOString(),
     notes: 'Personal account',
     isFavourited: false,
+    isRecurring: true,
   }),
   createMockSubscription({
     name: 'The New York Times',
@@ -71,6 +75,7 @@ const MOCK_SUBSCRIPTIONS: Subscription[] = [
     category: 'news',
     renewalDate: new Date(Date.now() + 20 * 86_400_000).toISOString(),
     isFavourited: false,
+    isRecurring: true,
   }),
   createMockSubscription({
     name: 'Adobe Creative Cloud',
@@ -80,6 +85,7 @@ const MOCK_SUBSCRIPTIONS: Subscription[] = [
     renewalDate: new Date(Date.now() + 6 * 86_400_000).toISOString(),
     notes: 'Photography plan',
     isFavourited: false,
+    isRecurring: true,
   }),
   createMockSubscription({
     name: 'iCloud+ 200GB',
@@ -88,6 +94,7 @@ const MOCK_SUBSCRIPTIONS: Subscription[] = [
     category: 'cloud',
     renewalDate: new Date(Date.now() + 1 * 86_400_000).toISOString(),
     isFavourited: false,
+    isRecurring: true,
   }),
   createMockSubscription({
     name: 'YouTube Premium',
@@ -97,6 +104,7 @@ const MOCK_SUBSCRIPTIONS: Subscription[] = [
     renewalDate: new Date(Date.now() + 18 * 86_400_000).toISOString(),
     notes: 'Individual plan',
     isFavourited: false,
+    isRecurring: true,
   }),
 ];
 
@@ -132,6 +140,7 @@ interface SubscriptionState {
   importData: (data: Subscription[]) => Promise<void>;
   toggleFavourite: (id: string) => Promise<void>;
   cancelSubscription: (id: string) => Promise<void>;
+  toggleRecurring: (id: string) => Promise<void>;
 }
 
 export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
@@ -256,6 +265,32 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
       set((state) => ({
         subscriptions: state.subscriptions.map((s) =>
           s.id === id ? sub : s,
+        ),
+        error: result.error.message,
+      }));
+    }
+  },
+
+  toggleRecurring: async (id) => {
+    const sub = get().subscriptions.find((s) => s.id === id);
+    if (!sub) return;
+
+    // Optimistic update
+    set((state) => ({
+      subscriptions: state.subscriptions.map((s) =>
+        s.id === id ? { ...s, isRecurring: !s.isRecurring } : s,
+      ),
+    }));
+
+    // Persist in background
+    const result = await favSvc.updateSubscription(id, {
+      isRecurring: !sub.isRecurring,
+    });
+    if (!result.ok) {
+      // Rollback on failure
+      set((state) => ({
+        subscriptions: state.subscriptions.map((s) =>
+          s.id === id ? { ...s, isRecurring: sub.isRecurring } : s,
         ),
         error: result.error.message,
       }));

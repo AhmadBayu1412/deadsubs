@@ -35,7 +35,10 @@ export function deriveSubscriptionListState(
 ): SubscriptionListState {
   const query = searchQuery.toLowerCase().trim();
 
-  const filtered = subscriptions.filter((s) => {
+  // Exclude cancelled subscriptions from the main list (they go to Cancel Assistant)
+  const activeSubscriptions = subscriptions.filter((s) => s.status !== 'cancelled');
+
+  const filtered = activeSubscriptions.filter((s) => {
     const matchesSearch =
       !query ||
       s.name.toLowerCase().includes(query) ||
@@ -64,7 +67,7 @@ export function deriveSubscriptionListState(
 
   return {
     filteredSubscriptions: filtered,
-    totalCount: subscriptions.length,
+    totalCount: activeSubscriptions.length,
     isLoading,
     isEmpty: filtered.length === 0,
     searchQuery,

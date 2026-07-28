@@ -25,6 +25,7 @@ export interface Subscription {
   notes?: string;
   cancelTargetDate?: string; // ISO date
   isFavourited: boolean;
+  isRecurring: boolean; // true = recurring subscription, false = one-time
   createdAt: string;
   updatedAt: string;
 }

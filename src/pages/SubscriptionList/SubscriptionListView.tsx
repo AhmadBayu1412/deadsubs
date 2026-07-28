@@ -1,15 +1,12 @@
 // Phase 11 — SubscriptionList View
-// Full subscription list with search, filter, sort, and OMDb discovery.
-import React, { useState, useCallback } from 'react';
-import { Search, Plus, X, SlidersHorizontal } from 'lucide-react';
+// Full subscription list with search, filter, sort.
+import { Search, X } from 'lucide-react';
 import { PageTitle } from '../../components/ui/PageTitle';
 import { SubscriptionCard, AddSubscriptionModal } from '../../views/components';
 import { Button } from '../../components/ui/Button';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { EmptyState } from '../../components/ui/EmptyState';
-import { Input } from '../../components/ui/Input';
 import { Select } from '../../components/ui/Select';
-import { type OMDbSearchResult } from '../../services/movieService';
 import { useSubscriptionListViewModel } from './useSubscriptionListViewModel';
 import { CATEGORY_LABELS } from '../../models/subscription';
 import {
@@ -23,45 +20,6 @@ import {
 
 function SubscriptionCardSkeleton() {
   return <Skeleton className="h-52 rounded-xl" />;
-}
-
-// ── OMDb discovery card ──────────────────────────────────────────────────────
-
-function OmdbResultCard({
-  result,
-  onAdd,
-}: {
-  result: OMDbSearchResult;
-  onAdd: (r: OMDbSearchResult) => void;
-}) {
-  return (
-    <div className="flex items-start gap-3 p-3 bg-surface rounded-xl border border-border">
-      {result.Poster !== 'N/A' ? (
-        <img
-          src={result.Poster}
-          alt={result.Title}
-          className="w-12 h-16 object-cover rounded-lg flex-shrink-0"
-        />
-      ) : (
-        <div className="w-12 h-16 bg-bg rounded-lg flex-shrink-0 flex items-center justify-center">
-          <span className="text-xs text-secondary">N/A</span>
-        </div>
-      )}
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-primary truncate">{result.Title}</p>
-        <p className="text-xs text-secondary mt-0.5">{result.Year}</p>
-      </div>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => onAdd(result)}
-        className="flex-shrink-0"
-        aria-label={`Add ${result.Title}`}
-      >
-        <Plus className="w-4 h-4" />
-      </Button>
-    </div>
-  );
 }
 
 // ── Filter bar ───────────────────────────────────────────────────────────────
@@ -165,22 +123,6 @@ function FilterBar({
 export function SubscriptionListView() {
   const vm = useSubscriptionListViewModel();
   const { state } = vm;
-  const [showOmdb, setShowOmdb] = useState(false);
-  const [localSearch, setLocalSearch] = useState('');
-
-  const handleSearchSubmit = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
-    if (localSearch.trim()) {
-      setShowOmdb(true);
-      vm.searchOmdb(localSearch.trim());
-    }
-  }, [localSearch, vm]);
-
-  const handleOmdbAdd = useCallback((_result: OMDbSearchResult) => {
-    setShowOmdb(false);
-    setLocalSearch('');
-    vm.clearOmdbResults();
-  }, [vm]);
 
   if (state.isLoading) {
     return (
@@ -202,7 +144,6 @@ export function SubscriptionListView() {
         description={`${state.totalCount} total`}
         action={
           <Button variant="primary" size="md" onClick={vm.openAddModal}>
-            <Plus className="w-4 h-4" />
             Add subscription
           </Button>
         }
@@ -222,57 +163,6 @@ export function SubscriptionListView() {
         onToggleSort={vm.toggleSortDir}
         onClearSearch={() => vm.setSearchQuery('')}
       />
-
-      {/* OMDb discovery panel */}
-      {showOmdb && (
-        <section className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-primary">Discover movies &amp; shows</h2>
-            <button
-              onClick={() => { setShowOmdb(false); vm.clearOmdbResults(); }}
-              className="text-secondary hover:text-primary cursor-pointer"
-              aria-label="Close discovery"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-
-          <form onSubmit={handleSearchSubmit} className="flex gap-2">
-            <Input
-              value={localSearch}
-              onChange={(e) => setLocalSearch(e.target.value)}
-              placeholder="Search for a movie or show to track…"
-              className="flex-1"
-            />
-            <Button type="submit" variant="primary" loading={vm.omdbLoading}>
-              Search
-            </Button>
-          </form>
-
-          {vm.omdbError && (
-            <p className="text-sm text-accent-red">{vm.omdbError}</p>
-          )}
-
-          {vm.omdbResults.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-              {vm.omdbResults.map((r) => (
-                <OmdbResultCard key={r.imdbID} result={r} onAdd={handleOmdbAdd} />
-              ))}
-            </div>
-          )}
-        </section>
-      )}
-
-      {/* Discover toggle */}
-      {!showOmdb && (
-        <button
-          onClick={() => setShowOmdb(true)}
-          className="flex items-center gap-2 text-sm text-accent-blue hover:underline cursor-pointer"
-        >
-          <SlidersHorizontal className="w-4 h-4" />
-          Discover movies &amp; shows
-        </button>
-      )}
 
       {/* Subscription grid */}
       {state.isEmpty ? (

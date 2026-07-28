@@ -64,6 +64,7 @@ export function SubscriptionForm({
       status: subscription?.status ?? 'active',
       notes: data.notes,
       isFavourited: subscription?.isFavourited ?? false,
+      isRecurring: subscription?.isRecurring ?? true,
     });
   });
 

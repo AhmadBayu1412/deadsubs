@@ -76,6 +76,7 @@ export function useHeaderViewModel() {
         renewalDate: new Date(data.renewalDate).toISOString(),
         status: 'active',
         isFavourited: false,
+        isRecurring: true,
       });
       addModal.onClose();
     },

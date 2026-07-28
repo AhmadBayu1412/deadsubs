@@ -16,7 +16,10 @@ export function deriveFavouritesState(
   subscriptions: Subscription[],
   isLoading: boolean,
 ): FavouritesState {
-  const favouritedSubscriptions = subscriptions.filter((s) => s.isFavourited);
+  // Exclude cancelled subscriptions from the favourited list
+  const favouritedSubscriptions = subscriptions.filter(
+    (s) => s.isFavourited && s.status !== 'cancelled'
+  );
   return {
     favouritedSubscriptions,
     isLoading,

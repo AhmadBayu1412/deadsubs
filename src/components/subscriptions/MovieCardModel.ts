@@ -66,6 +66,7 @@ export const MOVIE_CARD_MOCK: Subscription = {
   notes: 'Shared plan — 4K UHD',
   cancelTargetDate: undefined,
   isFavourited: false,
+  isRecurring: true,
   createdAt: '2024-01-01T00:00:00.000Z',
   updatedAt: '2024-01-01T00:00:00.000Z',
 };
@@ -81,6 +82,7 @@ export const MOVIE_CARD_MOCK_OVERDUE: Subscription = {
   notes: undefined,
   cancelTargetDate: undefined,
   isFavourited: true,
+  isRecurring: true,
   createdAt: '2024-01-01T00:00:00.000Z',
   updatedAt: '2024-01-01T00:00:00.000Z',
 };
@@ -96,6 +98,7 @@ export const MOVIE_CARD_MOCK_CANCELLED: Subscription = {
   notes: undefined,
   cancelTargetDate: new Date(Date.now() + 30 * 86_400_000).toISOString(),
   isFavourited: false,
+  isRecurring: true,
   createdAt: '2024-01-01T00:00:00.000Z',
   updatedAt: '2024-01-01T00:00:00.000Z',
 };

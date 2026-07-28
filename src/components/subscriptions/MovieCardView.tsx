@@ -1,6 +1,6 @@
 // MovieCard — Presentational view
 // Renders a subscription as a rich, interactive card.
-import { Heart, Calendar, AlertTriangle } from 'lucide-react';
+import { Heart, Calendar, AlertTriangle, CheckCircle2, RefreshCw } from 'lucide-react';
 import { clsx } from 'clsx';
 import { Button } from '../ui/Button';
 import {
@@ -19,19 +19,27 @@ export function MovieCard({
   subscription,
   viewModel,
 }: Readonly<MovieCardProps>) {
-  const { cardState, isFavourited, toggleFavourite, handleClick, handleCancel } =
-    viewModel;
+  const {
+    cardState,
+    isFavourited,
+    isRecurring,
+    isExpired,
+    toggleFavourite,
+    toggleRecurring,
+    handleClick,
+    handleCancel,
+  } = viewModel;
 
   const canCancel =
     subscription.status === 'active' || subscription.status === 'pending_cancel';
 
   // Compute renewal display outside JSX to avoid nested ternary
   const renewalDisplay = (() => {
-    if (cardState.isOverdue) {
+    if (isExpired) {
       return (
         <span className="flex items-center gap-1 text-accent-red font-medium">
           <AlertTriangle className="w-3 h-3" />
-          Overdue by {Math.abs(cardState.daysUntilRenewal)} days
+          Expired {Math.abs(cardState.daysUntilRenewal)} days ago
         </span>
       );
     }
@@ -45,6 +53,17 @@ export function MovieCard({
         ({cardState.daysUntilRenewal}d)
       </>
     );
+  })();
+
+  // Renewal status label
+  const renewalStatusLabel = (() => {
+    if (isExpired) {
+      return 'Expired';
+    }
+    if (isRecurring) {
+      return 'Auto-renew';
+    }
+    return 'One-time';
   })();
 
   return (
@@ -104,6 +123,38 @@ export function MovieCard({
         <div className="flex items-center gap-2 mt-auto">
           <Calendar className="w-3.5 h-3.5 text-secondary flex-shrink-0" />
           <span className="text-xs text-secondary">{renewalDisplay}</span>
+        </div>
+
+        {/* Auto-renew toggle */}
+        <div className="flex items-center justify-between pt-1">
+          <div className="flex items-center gap-2">
+            {isRecurring ? (
+              <RefreshCw className="w-4 h-4 text-accent-blue" />
+            ) : (
+              <CheckCircle2 className="w-4 h-4 text-secondary" />
+            )}
+            <span className="text-xs font-medium text-secondary">
+              {renewalStatusLabel}
+            </span>
+          </div>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleRecurring();
+            }}
+            className={clsx(
+              'relative inline-flex h-5 w-9 items-center rounded-full transition-colors cursor-pointer',
+              isRecurring ? 'bg-accent-blue' : 'bg-border',
+            )}
+            aria-label={isRecurring ? 'Disable auto-renew' : 'Enable auto-renew'}
+          >
+            <span
+              className={clsx(
+                'inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform shadow-sm',
+                isRecurring ? 'translate-x-4' : 'translate-x-1',
+              )}
+            />
+          </button>
         </div>
 
         {/* Action buttons */}

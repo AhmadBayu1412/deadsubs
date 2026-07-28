@@ -261,9 +261,10 @@ function AddModal({ isOpen, onClose, onSubmit }: AddModalProps) {
 
 interface HeaderProps {
   onMenuToggle?: () => void;
+  sidebarOpen?: boolean;
 }
 
-export function Header({ onMenuToggle }: HeaderProps) {
+export function Header({ onMenuToggle, sidebarOpen = true }: HeaderProps) {
   const vm = useHeaderViewModel();
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
@@ -273,8 +274,20 @@ export function Header({ onMenuToggle }: HeaderProps) {
       <div className="flex items-center justify-between gap-3 px-4 h-14">
         {/* Left: Logo + mobile hamburger */}
         <div className="flex items-center gap-2 flex-shrink-0">
-          <DeadSubsLogo />
-          <span className="text-sm font-bold text-primary hidden sm:block">DeadSubs</span>
+          {/* Logo — only visible when sidebar is closed. When sidebar is open, logo is in sidebar */}
+          <NavLink
+            to="/"
+            className={clsx(
+              'flex items-center gap-2 hover:opacity-80 transition-all duration-200',
+              sidebarOpen ? 'lg:hidden' : 'lg:flex'
+            )}
+            aria-label="DeadSubs — go to Dashboard"
+          >
+            <DeadSubsLogo />
+            <span className="text-sm font-bold text-primary hidden sm:block">
+              DeadSubs
+            </span>
+          </NavLink>
           {onMenuToggle && (
             <button
               onClick={onMenuToggle}

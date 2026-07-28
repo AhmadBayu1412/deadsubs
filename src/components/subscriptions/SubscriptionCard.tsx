@@ -14,5 +14,6 @@ export function SubscriptionCard({ subscription, onClick }: SubscriptionCardProp
     subscription,
     onClick: () => onClick(subscription.id),
   });
+
   return <MovieCard subscription={subscription} viewModel={cardVm} />;
 }
