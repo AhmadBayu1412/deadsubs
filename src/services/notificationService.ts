@@ -5,6 +5,7 @@ import { differenceInDays, startOfDay, isSameDay } from 'date-fns';
 import type { AppNotification, NewNotification, NotificationType } from '../types/notification';
 import { AppError, type ApiResult } from './errors';
 import * as db from './database';
+import { useAuthStore } from '../viewmodels/authStore';
 
 // ── Internal mapper ────────────────────────────────────────────────────────────
 
@@ -152,7 +153,9 @@ export async function clearAllNotifications(): Promise<ApiResult<void>> {
 // Called on app load to generate renewal/overdue notifications.
 
 export async function checkAndGenerateRenewalNotifications(): Promise<void> {
-  const subsResult = await db.getAllSubscriptions();
+  const userId = useAuthStore.getState().user?.uid;
+  if (!userId) return;
+  const subsResult = await db.getAllSubscriptions(userId);
   if (!subsResult.length) return;
 
   const notificationsResult = await db.getAllNotifications();

@@ -57,6 +57,7 @@ export function deriveMovieCardState(sub: Subscription): MovieCardState {
 
 export const MOVIE_CARD_MOCK: Subscription = {
   id: 'mock-netflix',
+  userId: 'mock-user',
   name: 'Netflix',
   cost: 1599,
   billingCycle: 'monthly',
@@ -73,6 +74,7 @@ export const MOVIE_CARD_MOCK: Subscription = {
 
 export const MOVIE_CARD_MOCK_OVERDUE: Subscription = {
   id: 'mock-spotify',
+  userId: 'mock-user',
   name: 'Spotify',
   cost: 1099,
   billingCycle: 'monthly',
@@ -89,6 +91,7 @@ export const MOVIE_CARD_MOCK_OVERDUE: Subscription = {
 
 export const MOVIE_CARD_MOCK_CANCELLED: Subscription = {
   id: 'mock-hulu',
+  userId: 'mock-user',
   name: 'Hulu',
   cost: 1799,
   billingCycle: 'monthly',

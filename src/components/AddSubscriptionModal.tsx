@@ -5,15 +5,15 @@ import { useSubscriptionStore } from '../viewmodels/subscriptionStore';
 import { Modal } from './ui/Modal';
 import { SubscriptionForm } from './ui/SubscriptionForm';
 import { toast } from 'react-hot-toast';
-import type { Subscription } from '../types/subscription';
+import type { NewSubscription } from '../types/subscription';
 
 export function AddSubscriptionModal() {
-  const open = useSubscriptionStore((s: { addModalOpen: boolean }) => s.addModalOpen);
-  const close = useSubscriptionStore((s: { closeAddModal: () => void }) => s.closeAddModal);
-  const add = useSubscriptionStore((s: { add: (data: Omit<Subscription, 'id' | 'createdAt' | 'updatedAt'>) => Promise<string> }) => s.add);
+  const open = useSubscriptionStore((s) => s.addModalOpen);
+  const close = useSubscriptionStore((s) => s.closeAddModal);
+  const add = useSubscriptionStore((s) => s.add);
 
   const handleSubmit = useCallback(
-    async (data: Parameters<typeof add>[0]) => {
+    async (data: NewSubscription) => {
       try {
         await add(data);
         toast.success(`${data.name} added`);
