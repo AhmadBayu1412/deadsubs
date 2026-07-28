@@ -1,6 +1,8 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { RefreshCw, CheckCircle2 } from 'lucide-react';
+import { clsx } from 'clsx';
 import { Button } from './Button';
 import { Input } from './Input';
 import { Select } from './Select';
@@ -17,6 +19,7 @@ const schema = z.object({
   ]),
   renewalDate: z.string().min(1, 'Renewal date is required'),
   notes: z.string().optional(),
+  isRecurring: z.boolean(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -49,10 +52,12 @@ export function SubscriptionForm({
       category: subscription?.category ?? 'other',
       renewalDate: subscription?.renewalDate?.split('T')[0] ?? '',
       notes: subscription?.notes ?? '',
+      isRecurring: subscription?.isRecurring ?? true,
     },
   });
 
   const billingCycle = watch('billingCycle');
+  const isRecurring = watch('isRecurring');
 
   const handleFormSubmit = handleSubmit((data) => {
     onSubmit({
@@ -64,7 +69,7 @@ export function SubscriptionForm({
       status: subscription?.status ?? 'active',
       notes: data.notes,
       isFavourited: subscription?.isFavourited ?? false,
-      isRecurring: subscription?.isRecurring ?? true,
+      isRecurring: data.isRecurring,
     });
   });
 
@@ -119,6 +124,39 @@ export function SubscriptionForm({
         error={errors.renewalDate?.message}
         {...register('renewalDate')}
       />
+
+      {/* Auto-renew toggle */}
+      <div className="flex items-center justify-between py-2 border border-border rounded-lg px-3 bg-bg">
+        <div className="flex items-center gap-2">
+          {isRecurring ? (
+            <RefreshCw className="w-4 h-4 text-accent-blue" />
+          ) : (
+            <CheckCircle2 className="w-4 h-4 text-secondary" />
+          )}
+          <div>
+            <p className="text-sm font-medium text-primary">Auto-renew</p>
+            <p className="text-xs text-secondary">
+              {isRecurring ? 'Subscription will renew automatically' : 'One-time purchase — no auto-renewal'}
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => setValue('isRecurring', !isRecurring)}
+          className={clsx(
+            'relative inline-flex h-5 w-9 items-center rounded-full transition-colors cursor-pointer flex-shrink-0',
+            isRecurring ? 'bg-accent-blue' : 'bg-border',
+          )}
+          aria-label={isRecurring ? 'Disable auto-renew' : 'Enable auto-renew'}
+        >
+          <span
+            className={clsx(
+              'inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform shadow-sm',
+              isRecurring ? 'translate-x-4' : 'translate-x-1',
+            )}
+          />
+        </button>
+      </div>
 
       <div className="flex flex-col gap-1.5">
         <label className="text-sm font-medium text-primary">Notes (optional)</label>

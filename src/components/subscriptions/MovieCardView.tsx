@@ -2,6 +2,7 @@
 // Renders a subscription as a rich, interactive card.
 import { Heart, Calendar, AlertTriangle, CheckCircle2, RefreshCw } from 'lucide-react';
 import { clsx } from 'clsx';
+import { format } from 'date-fns';
 import { Button } from '../ui/Button';
 import {
   CategoryBadge,
@@ -24,38 +25,42 @@ export function MovieCard({
     isFavourited,
     isRecurring,
     isExpired,
+    displayRenewalDate,
+    daysUntilRenewal,
     toggleFavourite,
     toggleRecurring,
     handleClick,
     handleCancel,
   } = viewModel;
 
+  const renewalLabel = format(displayRenewalDate, 'MMM d, yyyy');
+
   const canCancel =
     subscription.status === 'active' || subscription.status === 'pending_cancel';
 
-  // Compute renewal display outside JSX to avoid nested ternary
+  // Compute renewal display using displayRenewalDate (auto-renew aware)
   const renewalDisplay = (() => {
     if (isExpired) {
       return (
         <span className="flex items-center gap-1 text-accent-red font-medium">
           <AlertTriangle className="w-3 h-3" />
-          Expired {Math.abs(cardState.daysUntilRenewal)} days ago
+          Expired {Math.abs(daysUntilRenewal)} days ago
         </span>
       );
     }
-    if (cardState.daysUntilRenewal === 0) {
+    if (daysUntilRenewal === 0) {
       return <span className="text-accent-red font-medium">Renews today</span>;
     }
     return (
       <>
         Renews{' '}
-        <span className="font-medium text-primary">{cardState.renewalLabel}</span>{' '}
-        ({cardState.daysUntilRenewal}d)
+        <span className="font-medium text-primary">{renewalLabel}</span>{' '}
+        ({daysUntilRenewal}d)
       </>
     );
   })();
 
-  // Renewal status label
+  // Renewal status label — recurring always shows auto-renew (even if date is past)
   const renewalStatusLabel = (() => {
     if (isExpired) {
       return 'Expired';

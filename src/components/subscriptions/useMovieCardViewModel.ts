@@ -4,6 +4,7 @@
 import { useCallback } from 'react';
 import type { Subscription } from '../../models/subscription';
 import { useSubscriptionStore } from '../../viewmodels/subscriptionStore';
+import { addMonths } from 'date-fns';
 import {
   deriveMovieCardState,
   type MovieCardState,
@@ -14,6 +15,8 @@ export interface MovieCardViewModel {
   isFavourited: boolean;
   isRecurring: boolean;
   isExpired: boolean;
+  displayRenewalDate: Date;
+  daysUntilRenewal: number;
   toggleFavourite: () => void;
   toggleRecurring: () => void;
   handleClick: () => void;
@@ -43,11 +46,47 @@ export function useMovieCardViewModel({
   const effectiveFavourited = storeFavourited ?? isFavourited;
   const effectiveRecurring = storeRecurring ?? subscription.isRecurring;
 
-  // Check if subscription is expired (overdue and active)
-  const renewalDate = new Date(subscription.renewalDate);
-  const now = new Date();
-  now.setHours(0, 0, 0, 0);
-  const isExpired = renewalDate < now && subscription.status === 'active';
+  // Parse renewalDate as UTC midnight (the date stored in ISO format)
+  const renewalUTC = Date.UTC(
+    Number(subscription.renewalDate.slice(0, 4)),
+    Number(subscription.renewalDate.slice(5, 7)) - 1,
+    Number(subscription.renewalDate.slice(8, 10)),
+  );
+
+  // Today's date as UTC midnight
+  const nowUTC = Date.now();
+  const todayUTC = Date.UTC(
+    new Date(nowUTC).getUTCFullYear(),
+    new Date(nowUTC).getUTCMonth(),
+    new Date(nowUTC).getUTCDate(),
+  );
+
+  // displayRenewalDate: if recurring and past, push to next cycle
+  // Use UTC epoch milliseconds for clean math
+  let displayUTC = renewalUTC;
+  while (displayUTC <= todayUTC && effectiveRecurring) {
+    switch (subscription.billingCycle) {
+      case 'weekly':
+        displayUTC += 7 * 24 * 60 * 60 * 1000;
+        break;
+      case 'yearly':
+        displayUTC += 365 * 24 * 60 * 60 * 1000;
+        break;
+      case 'monthly':
+      default: {
+        const d = new Date(displayUTC);
+        const next = addMonths(d, 1);
+        displayUTC = Date.UTC(next.getFullYear(), next.getMonth(), next.getDate());
+        break;
+      }
+    }
+  }
+
+  const displayRenewalDate = new Date(displayUTC);
+  const daysUntilRenewal = Math.round((displayUTC - todayUTC) / (24 * 60 * 60 * 1000));
+
+  // isExpired: only if past AND NOT recurring (recurring auto-renews, so never "expired")
+  const isExpired = renewalUTC < todayUTC && subscription.status === 'active' && !effectiveRecurring;
 
   const toggleFavourite = useCallback(async () => {
     await useSubscriptionStore.getState().toggleFavourite(subscription.id);
@@ -75,6 +114,8 @@ export function useMovieCardViewModel({
     isFavourited: effectiveFavourited,
     isRecurring: effectiveRecurring,
     isExpired,
+    displayRenewalDate,
+    daysUntilRenewal,
     toggleFavourite,
     toggleRecurring,
     handleClick,
