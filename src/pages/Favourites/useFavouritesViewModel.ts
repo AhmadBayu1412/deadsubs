@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSubscriptionStore } from '../../viewmodels/subscriptionStore';
+import { useAuthStore } from '../../viewmodels/authStore';
 import {
   type FavouritesState,
   deriveFavouritesState,
@@ -20,10 +21,11 @@ export function useFavouritesViewModel(): FavouritesViewModel {
   const subscriptions = useSubscriptionStore((s) => s.subscriptions);
   const fetchAll = useSubscriptionStore((s) => s.fetchAll);
   const loading = useSubscriptionStore((s) => s.loading);
+  const user = useAuthStore((s) => s.user);
 
   useEffect(() => {
-    fetchAll();
-  }, [fetchAll]);
+    if (user) fetchAll();
+  }, [user, fetchAll]);
 
   const state = useMemo<FavouritesState>(
     () => deriveFavouritesState(subscriptions, loading),
@@ -41,8 +43,8 @@ export function useFavouritesViewModel(): FavouritesViewModel {
   );
 
   const refresh = useCallback(() => {
-    fetchAll();
-  }, [fetchAll]);
+    if (user) fetchAll();
+  }, [user, fetchAll]);
 
   return { state, navigateToSubscription, navigateToSubscriptions, refresh };
 }

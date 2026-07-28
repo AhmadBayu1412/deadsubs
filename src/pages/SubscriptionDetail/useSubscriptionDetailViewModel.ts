@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useCallback, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSubscriptionStore } from '../../viewmodels/subscriptionStore';
+import { useAuthStore } from '../../viewmodels/authStore';
 import type { Subscription, NewSubscription } from '../../types/subscription';
 import {
   type SubscriptionDetailState,
@@ -27,6 +28,7 @@ export function useSubscriptionDetailViewModel(): SubscriptionDetailViewModel {
   const update = useSubscriptionStore((s) => s.update);
   const remove = useSubscriptionStore((s) => s.remove);
   const cancelSubscription = useSubscriptionStore((s) => s.cancelSubscription);
+  const user = useAuthStore((s) => s.user);
 
   const subscription = useMemo<Subscription | null>(
     () => subscriptions.find((s) => s.id === id) ?? null,
@@ -41,8 +43,8 @@ export function useSubscriptionDetailViewModel(): SubscriptionDetailViewModel {
   const [openEdit, setOpenEdit] = useState(false);
 
   useEffect(() => {
-    if (!subscriptions.length) fetchAll();
-  }, [subscriptions.length, fetchAll]);
+    if (user && !subscriptions.length) fetchAll();
+  }, [user, subscriptions.length, fetchAll]);
 
   const editSubscription = useCallback(
     async (data: NewSubscription) => {

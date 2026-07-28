@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSubscriptionStore } from '../../viewmodels/subscriptionStore';
+import { useAuthStore } from '../../viewmodels/authStore';
 import { searchMovies, type OMDbSearchResult } from '../../services/movieService';
 import {
   type SubscriptionListState,
@@ -44,11 +45,12 @@ export function useSubscriptionListViewModel(): SubscriptionListViewModel {
   const loading = useSubscriptionStore((s) => s.loading);
   const openAddModal = useSubscriptionStore((s) => s.openAddModal);
   const remove = useSubscriptionStore((s) => s.remove);
+  const user = useAuthStore((s) => s.user);
 
-  // Load on mount
+  // Load when user is authenticated
   useEffect(() => {
-    fetchAll();
-  }, [fetchAll]);
+    if (user) fetchAll();
+  }, [user, fetchAll]);
 
   // Filter/sort state
   const [searchQuery, setSearchQuery] = useState('');

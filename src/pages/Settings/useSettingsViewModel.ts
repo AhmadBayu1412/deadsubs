@@ -39,6 +39,7 @@ export function useSettingsViewModel(): SettingsViewModel {
   }, [logout, navigate]);
 
   const handleClearAllData = useCallback(async () => {
+    const userId = user?.uid;
     // 1. Persist the clears to IndexedDB
     await clearAllAppData();
 
@@ -46,14 +47,14 @@ export function useSettingsViewModel(): SettingsViewModel {
     clearSubscriptions();
     clearNotifications();
 
-    // 3. Reload subscription data (triggers re-seed if empty)
-    await fetchAllSubscriptions();
+    // 3. Reload subscription data for this user
+    if (userId) await fetchAllSubscriptions();
     // 4. Reload notification data
     await fetchAllNotifications();
 
     // 5. Close dialog
     dialogState.onClose();
-  }, [clearSubscriptions, clearNotifications, fetchAllSubscriptions, fetchAllNotifications, dialogState]);
+  }, [user, clearSubscriptions, clearNotifications, fetchAllSubscriptions, fetchAllNotifications, dialogState]);
 
   const state: SettingsState = {
     user,

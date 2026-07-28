@@ -14,9 +14,9 @@ function mapDbError(err: unknown, context: string): AppError {
 
 // ── CRUD ────────────────────────────────────────────────────────────────────────
 
-export async function getAllSubscriptions(): Promise<ApiResult<Subscription[]>> {
+export async function getAllSubscriptions(userId: string): Promise<ApiResult<Subscription[]>> {
   try {
-    const result = await db.getAllSubscriptions();
+    const result = await db.getAllSubscriptions(userId);
     return AppError.ok(result);
   } catch (err) {
     return mapDbError(err, 'load subscriptions').toResult<Subscription[]>();
@@ -38,10 +38,11 @@ export async function getSubscriptionById(
 }
 
 export async function addSubscription(
-  data: Omit<Subscription, 'id' | 'createdAt' | 'updatedAt'>,
+  userId: string,
+  data: Omit<Subscription, 'id' | 'userId' | 'createdAt' | 'updatedAt'>,
 ): Promise<ApiResult<{ id: string }>> {
   try {
-    const id = await db.addSubscription(data);
+    const id = await db.addSubscription(userId, data);
     return AppError.ok({ id });
   } catch (err) {
     return mapDbError(err, 'add subscription').toResult<{ id: string }>();
@@ -81,10 +82,11 @@ export async function clearAllSubscriptions(): Promise<ApiResult<void>> {
 }
 
 export async function importSubscriptions(
+  userId: string,
   data: Subscription[],
 ): Promise<ApiResult<void>> {
   try {
-    await db.importData(data);
+    await db.importData(userId, data);
     return AppError.ok(undefined);
   } catch (err) {
     return mapDbError(err, 'import subscriptions').toResult<void>();

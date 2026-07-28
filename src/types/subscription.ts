@@ -16,6 +16,7 @@ export type Status = 'active' | 'paused' | 'cancelled' | 'pending_cancel';
 
 export interface Subscription {
   id: string;
+  userId: string; // Firebase UID
   name: string;
   cost: number; // in cents
   billingCycle: BillingCycle;
@@ -30,7 +31,7 @@ export interface Subscription {
   updatedAt: string;
 }
 
-export type NewSubscription = Omit<Subscription, 'id' | 'createdAt' | 'updatedAt'>;
+export type NewSubscription = Omit<Subscription, 'id' | 'userId' | 'createdAt' | 'updatedAt'>;
 
 export interface UserSettings {
   uid: string;

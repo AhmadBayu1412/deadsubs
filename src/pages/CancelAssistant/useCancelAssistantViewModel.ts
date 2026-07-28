@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSubscriptionStore } from '../../viewmodels/subscriptionStore';
+import { useAuthStore } from '../../viewmodels/authStore';
 import {
   type CancelAssistantState,
   deriveCancelAssistantState,
@@ -22,10 +23,11 @@ export function useCancelAssistantViewModel(): CancelAssistantViewModel {
   const fetchAll = useSubscriptionStore((s) => s.fetchAll);
   const update = useSubscriptionStore((s) => s.update);
   const remove = useSubscriptionStore((s) => s.remove);
+  const user = useAuthStore((s) => s.user);
 
   useEffect(() => {
-    fetchAll();
-  }, [fetchAll]);
+    if (user) fetchAll();
+  }, [user, fetchAll]);
 
   const state = useMemo<CancelAssistantState>(
     () => deriveCancelAssistantState(subscriptions, false),

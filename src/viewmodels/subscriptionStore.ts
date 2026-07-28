@@ -1,126 +1,11 @@
 // Phase 10 — Subscription Store
-// Uses favouriteService for all DB operations.
+// All DB operations are scoped to the currently authenticated Firebase user (uid).
 // Keeps optimistic UI pattern for toggleFavourite.
 import { create } from 'zustand';
 import type { Subscription } from '../models/subscription';
+import { useAuthStore } from './authStore';
 import * as favSvc from '../services/favouriteService';
 import * as notificationSvc from '../services/notificationService';
-
-const SEEDED_KEY = 'deadsubs_seeded_v1';
-
-// ── Mock seed data (Phase 9) ─────────────────────────────────────────────────
-
-function createMockSubscription(
-  overrides: Partial<Subscription> & {
-    name: string;
-    cost: number;
-    billingCycle: Subscription['billingCycle'];
-    category: Subscription['category'];
-    renewalDate: string;
-  },
-): Subscription {
-  const now = new Date().toISOString();
-  return {
-    id: crypto.randomUUID(),
-    name: overrides.name,
-    cost: overrides.cost,
-    billingCycle: overrides.billingCycle,
-    category: overrides.category,
-    renewalDate: overrides.renewalDate,
-    status: 'active',
-    notes: undefined,
-    cancelTargetDate: undefined,
-    isFavourited: false,
-    isRecurring: overrides.isRecurring ?? true,
-    createdAt: now,
-    updatedAt: now,
-  };
-}
-
-const MOCK_SUBSCRIPTIONS: Subscription[] = [
-  createMockSubscription({
-    name: 'Netflix',
-    cost: 1599,
-    billingCycle: 'monthly',
-    category: 'streaming',
-    renewalDate: new Date(Date.now() + 12 * 86_400_000).toISOString(),
-    notes: 'Shared plan — 4K UHD',
-    isFavourited: true,
-    isRecurring: true,
-  }),
-  createMockSubscription({
-    name: 'Spotify',
-    cost: 1099,
-    billingCycle: 'monthly',
-    category: 'music',
-    renewalDate: new Date(Date.now() + 3 * 86_400_000).toISOString(),
-    notes: 'Family plan',
-    isFavourited: false,
-    isRecurring: true,
-  }),
-  createMockSubscription({
-    name: 'GitHub Copilot',
-    cost: 1000,
-    billingCycle: 'monthly',
-    category: 'software',
-    renewalDate: new Date(Date.now() - 2 * 86_400_000).toISOString(),
-    notes: 'Personal account',
-    isFavourited: false,
-    isRecurring: true,
-  }),
-  createMockSubscription({
-    name: 'The New York Times',
-    cost: 1700,
-    billingCycle: 'monthly',
-    category: 'news',
-    renewalDate: new Date(Date.now() + 20 * 86_400_000).toISOString(),
-    isFavourited: false,
-    isRecurring: true,
-  }),
-  createMockSubscription({
-    name: 'Adobe Creative Cloud',
-    cost: 5999,
-    billingCycle: 'monthly',
-    category: 'software',
-    renewalDate: new Date(Date.now() + 6 * 86_400_000).toISOString(),
-    notes: 'Photography plan',
-    isFavourited: false,
-    isRecurring: true,
-  }),
-  createMockSubscription({
-    name: 'iCloud+ 200GB',
-    cost: 299,
-    billingCycle: 'monthly',
-    category: 'cloud',
-    renewalDate: new Date(Date.now() + 1 * 86_400_000).toISOString(),
-    isFavourited: false,
-    isRecurring: true,
-  }),
-  createMockSubscription({
-    name: 'YouTube Premium',
-    cost: 1318,
-    billingCycle: 'monthly',
-    category: 'streaming',
-    renewalDate: new Date(Date.now() + 18 * 86_400_000).toISOString(),
-    notes: 'Individual plan',
-    isFavourited: false,
-    isRecurring: true,
-  }),
-];
-
-async function seedIfEmpty(): Promise<void> {
-  try {
-    const allResult = await favSvc.getAllSubscriptions();
-    if (!allResult.ok) return;
-    if (allResult.data.length > 0) return;
-    const seeded = localStorage.getItem(SEEDED_KEY);
-    if (seeded !== null) return;
-    await favSvc.importSubscriptions(MOCK_SUBSCRIPTIONS);
-    localStorage.setItem(SEEDED_KEY, '1');
-  } catch {
-    // Silently skip seeding on error
-  }
-}
 
 // ── Store ─────────────────────────────────────────────────────────────────────
 
@@ -133,7 +18,7 @@ interface SubscriptionState {
   openAddModal: () => void;
   closeAddModal: () => void;
   fetchAll: () => Promise<void>;
-  add: (data: Omit<Subscription, 'id' | 'createdAt' | 'updatedAt'>) => Promise<string>;
+  add: (data: Omit<Subscription, 'id' | 'userId' | 'createdAt' | 'updatedAt'>) => Promise<string>;
   update: (id: string, data: Partial<Subscription>) => Promise<void>;
   remove: (id: string) => Promise<void>;
   clearAll: () => Promise<void>;
@@ -153,9 +38,10 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
   closeAddModal: () => set({ addModalOpen: false }),
 
   fetchAll: async () => {
+    const userId = useAuthStore.getState().user?.uid;
+    if (!userId) return;
     set({ loading: true, error: null });
-    await seedIfEmpty();
-    const result = await favSvc.getAllSubscriptions();
+    const result = await favSvc.getAllSubscriptions(userId);
     if (result.ok) {
       set({ subscriptions: result.data, loading: false, initialized: true });
     } else {
@@ -164,7 +50,9 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
   },
 
   add: async (data) => {
-    const result = await favSvc.addSubscription(data);
+    const userId = useAuthStore.getState().user?.uid;
+    if (!userId) throw new Error('Not authenticated');
+    const result = await favSvc.addSubscription(userId, data);
     if (!result.ok) {
       set({ error: result.error.message });
       throw result.error;
@@ -198,11 +86,12 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
   clearAll: async () => {
     await favSvc.clearAllSubscriptions();
     set({ subscriptions: [] });
-    localStorage.removeItem(SEEDED_KEY);
   },
 
   importData: async (data) => {
-    const result = await favSvc.importSubscriptions(data);
+    const userId = useAuthStore.getState().user?.uid;
+    if (!userId) throw new Error('Not authenticated');
+    const result = await favSvc.importSubscriptions(userId, data);
     if (!result.ok) {
       set({ error: result.error.message });
       throw result.error;

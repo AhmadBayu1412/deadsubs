@@ -2,6 +2,7 @@
 // Handles sign-in / sign-up flow via useAuthStore.
 // Uses react-hook-form for validation; zod schema + error map live in AuthModel.
 import { useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuthStore } from '../../viewmodels/authStore';
@@ -34,6 +35,7 @@ export interface AuthViewModel {
 // ── Hook ──────────────────────────────────────────────────────────────────────
 
 export function useAuthViewModel(): AuthViewModel {
+  const navigate = useNavigate();
   const authStore = useAuthStore();
   const [mode, setModeState] = useState<AuthMode>('signin');
   const [serverError, setServerError] = useState<string | null>(null);
@@ -57,6 +59,7 @@ export function useAuthViewModel(): AuthViewModel {
         } else {
           await authStore.register((data as SignUpInput).email, (data as SignUpInput).password);
         }
+        navigate('/', { replace: true });
       } catch (err: unknown) {
         const code = (err as { code?: string }).code ?? '';
         setServerError(
@@ -67,7 +70,7 @@ export function useAuthViewModel(): AuthViewModel {
         );
       }
     },
-    [mode, authStore],
+    [mode, authStore, navigate],
   );
 
   const setMode = useCallback(
@@ -102,12 +105,9 @@ export function useAuthViewModel(): AuthViewModel {
     formError,
     setMode,
     handleSubmit: (onSuccess) =>
-      handleSubmit(
-        async (data) => {
-          await onSubmit(data);
-          await onSuccess(data as SignInInput | SignUpInput);
-        },
-        undefined,
-      ),
+      handleSubmit(async (data) => {
+        await onSubmit(data);
+        await onSuccess(data as SignInInput | SignUpInput);
+      }),
   };
 }

@@ -12,7 +12,7 @@ db.version(1).stores({
 });
 
 db.version(2).stores({
-  subscriptions: 'id, name, category, status, renewalDate, createdAt',
+  subscriptions: 'id, name, category, status, renewalDate, createdAt, userId',
   notifications: 'id, type, subscriptionId, read, createdAt',
 });
 
@@ -20,8 +20,8 @@ export { db };
 
 // ── Subscriptions ──────────────────────────────────────────────────────────────
 
-export async function getAllSubscriptions(): Promise<Subscription[]> {
-  return db.subscriptions.orderBy('renewalDate').toArray();
+export async function getAllSubscriptions(userId: string): Promise<Subscription[]> {
+  return db.subscriptions.where('userId').equals(userId).sortBy('renewalDate');
 }
 
 export async function getSubscriptionById(
@@ -31,17 +31,18 @@ export async function getSubscriptionById(
 }
 
 export async function addSubscription(
-  data: Omit<Subscription, 'id' | 'createdAt' | 'updatedAt'>
+  userId: string,
+  data: Omit<Subscription, 'id' | 'userId' | 'createdAt' | 'updatedAt'>
 ): Promise<string> {
   const id = crypto.randomUUID();
   const now = new Date().toISOString();
-  await db.subscriptions.add({ ...data, id, createdAt: now, updatedAt: now });
+  await db.subscriptions.add({ ...data, id, userId, createdAt: now, updatedAt: now });
   return id;
 }
 
 export async function updateSubscription(
   id: string,
-  data: Partial<Omit<Subscription, 'id' | 'createdAt'>>
+  data: Partial<Omit<Subscription, 'id' | 'userId' | 'createdAt'>>
 ): Promise<void> {
   await db.subscriptions.update(id, { ...data, updatedAt: new Date().toISOString() });
 }
@@ -51,11 +52,14 @@ export async function deleteSubscription(id: string): Promise<void> {
 }
 
 export async function getUpcomingSubscriptions(
+  userId: string,
   daysAhead: number
 ): Promise<Subscription[]> {
   const now = new Date();
   const future = new Date(now.getTime() + daysAhead * 24 * 60 * 60 * 1000);
   const all = await db.subscriptions
+    .where('userId')
+    .equals(userId)
     .filter((s) => s.status === 'active')
     .toArray();
   return all.filter((s) => {
@@ -68,12 +72,12 @@ export async function clearAllSubscriptions(): Promise<void> {
   await db.subscriptions.clear();
 }
 
-export async function exportAllData(): Promise<Subscription[]> {
-  return db.subscriptions.toArray();
+export async function exportAllData(userId: string): Promise<Subscription[]> {
+  return db.subscriptions.where('userId').equals(userId).toArray();
 }
 
-export async function importData(subscriptions: Subscription[]): Promise<void> {
-  await db.subscriptions.bulkPut(subscriptions);
+export async function importData(userId: string, subscriptions: Subscription[]): Promise<void> {
+  await db.subscriptions.bulkPut(subscriptions.map(s => ({ ...s, userId })));
 }
 
 // ── Notifications ────────────────────────────────────────────────────────────────
