@@ -128,24 +128,30 @@ export function AnalyticsView() {
 
           {/* Row 2: Counts */}
           <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 lg:gap-4">
-            <StatCard
-              label="Active"
-              value={String(metrics.activeCount)}
-              sub="subscriptions"
-              icon={Grid}
-            />
-            <StatCard
-              label="Paused"
-              value={String(metrics.pausedCount)}
-              sub="subscriptions"
-              icon={RotateCcw}
-            />
-            <StatCard
-              label="Cancelled"
-              value={String(metrics.cancelledCount)}
-              sub="subscriptions"
-              icon={RotateCcw}
-            />
+            {metrics.activeCount > 0 && (
+              <StatCard
+                label="Active"
+                value={String(metrics.activeCount)}
+                sub="subscriptions"
+                icon={Grid}
+              />
+            )}
+            {metrics.pausedCount > 0 && (
+              <StatCard
+                label="Paused"
+                value={String(metrics.pausedCount)}
+                sub="subscriptions"
+                icon={RotateCcw}
+              />
+            )}
+            {metrics.cancelledCount > 0 && (
+              <StatCard
+                label="Cancelled"
+                value={String(metrics.cancelledCount)}
+                sub="subscriptions"
+                icon={RotateCcw}
+              />
+            )}
             <StatCard
               label="Overdue"
               value={String(metrics.overdueRenewals.length)}
@@ -288,12 +294,14 @@ export function AnalyticsView() {
               </CardHeader>
               <CardContent className="p-4">
                 <div className="flex items-center gap-4">
-                  {metrics.byStatus.map((item) => (
-                    <div key={item.status} className="flex-1 text-center">
-                      <p className="text-2xl font-bold text-primary">{item.count}</p>
-                      <p className="text-xs text-secondary mt-0.5">{item.label}</p>
-                    </div>
-                  ))}
+                  {metrics.byStatus
+                    .filter((item) => item.count > 0)
+                    .map((item) => (
+                      <div key={item.status} className="flex-1 text-center">
+                        <p className="text-2xl font-bold text-primary">{item.count}</p>
+                        <p className="text-xs text-secondary mt-0.5">{item.label}</p>
+                      </div>
+                    ))}
                 </div>
               </CardContent>
             </Card>

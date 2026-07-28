@@ -108,23 +108,26 @@ export function computeAnalytics(subscriptions: Subscription[]): AnalyticsMetric
   const cancelled = subscriptions.filter((s) => s.status === 'cancelled');
   const pendingCancel = subscriptions.filter((s) => s.status === 'pending_cancel');
 
-  // Spending — active subscriptions with isRecurring enabled only
-  // Only count subscriptions that will actually renew in the future
-  const recurringActive = active.filter((s) => s.isRecurring);
-  const totalMonthly = recurringActive.reduce(
+  // Spending — all active subscriptions
+  const totalMonthly = active.reduce(
     (sum, s) => sum + toMonthlyEquivalent(s.cost, s.billingCycle),
     0,
   );
-  const totalYearly = recurringActive.reduce(
-    (sum, s) => sum + toYearlyEquivalent(s.cost, s.billingCycle),
-    0,
-  );
+  // Yearly: recurring subs get their real yearly equivalent,
+  // non-recurring subs show the same as monthly (they won't renew)
+  const totalYearly = active.reduce((sum, s) => {
+    if (s.isRecurring) {
+      return sum + toYearlyEquivalent(s.cost, s.billingCycle);
+    }
+    return sum + toMonthlyEquivalent(s.cost, s.billingCycle);
+  }, 0);
+  // Average monthly: based on all active subscriptions
   const averageMonthly = active.length > 0
     ? Math.round(totalMonthly / active.length)
     : 0;
 
-  // Most/least expensive — based on recurring active subscriptions only
-  const sorted = [...recurringActive].sort(
+  // Most/least expensive — based on all active subscriptions
+  const sorted = [...active].sort(
     (a, b) =>
       toMonthlyEquivalent(b.cost, b.billingCycle) -
       toMonthlyEquivalent(a.cost, a.billingCycle),
@@ -181,9 +184,9 @@ export function computeAnalytics(subscriptions: Subscription[]): AnalyticsMetric
     }),
   );
 
-  // Category breakdown
+  // Category breakdown — all active subscriptions
   const categoryMap = new Map<Category, { count: number; monthly: number; yearly: number }>();
-  recurringActive.forEach((s) => {
+  active.forEach((s) => {
     const existing = categoryMap.get(s.category) ?? { count: 0, monthly: 0, yearly: 0 };
     categoryMap.set(s.category, {
       count: existing.count + 1,
