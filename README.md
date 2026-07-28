@@ -1,8 +1,10 @@
 # DeadSubs
+<img width="1846" height="963" alt="image" src="https://github.com/user-attachments/assets/b4be5b45-d79f-4412-b038-802818dd5e42" />
 
 > A focused financial wellness tool that helps users eliminate unwanted subscription auto-renewals, understand their monthly burn rate, and execute quick cancellations.
 
 **Live App:** [deadsubs.netlify.app](https://deadsubs.netlify.app/)
+
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Ahmad%20Bayu%20Samudera-0077B1?style=flat&logo=linkedin)](https://www.linkedin.com/in/ahmad-bayu-samudera-985880236/)
 [![GitHub](https://img.shields.io/badge/GitHub-AhmadBayu1412-181717?style=flat&logo=github)](https://github.com/AhmadBayu1412)
 
