@@ -127,7 +127,7 @@ export function AnalyticsView() {
           </div>
 
           {/* Row 2: Counts */}
-          <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 lg:gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 lg:gap-4">
             {metrics.activeCount > 0 && (
               <StatCard
                 label="Active"
@@ -323,12 +323,12 @@ export function AnalyticsView() {
                   </div>
                 ) : (
                   metrics.overdueRenewals.slice(0, 5).map((sub) => (
-                    <div key={sub.id} className="flex items-center justify-between px-4 py-3">
+                    <div key={sub.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 py-3">
                       <div className="flex items-center gap-3">
                         <CategoryBadge category={sub.category} />
                         <span className="text-sm font-medium text-primary">{sub.name}</span>
                       </div>
-                      <div className="flex items-center gap-4 text-xs text-secondary">
+                      <div className="flex items-center gap-3 sm:gap-4 text-xs text-secondary">
                         <span>{formatCents(sub.cost)}</span>
                         <span className="text-accent-red font-medium">
                           {Math.abs(
@@ -356,13 +356,13 @@ export function AnalyticsView() {
                 {metrics.upcomingRenewals.slice(0, 10).map((sub) => (
                   <div
                     key={sub.id}
-                    className="flex items-center justify-between px-4 py-3"
+                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 py-3"
                   >
                     <div className="flex items-center gap-3">
                       <CategoryBadge category={sub.category} />
                       <span className="text-sm font-medium text-primary">{sub.name}</span>
                     </div>
-                    <div className="flex items-center gap-4 text-xs text-secondary">
+                    <div className="flex items-center gap-2 sm:gap-4 text-xs text-secondary">
                       <span>{formatCents(sub.cost)}</span>
                       <span>{BILLING_CYCLE_LABELS[sub.billingCycle]}</span>
                       <span

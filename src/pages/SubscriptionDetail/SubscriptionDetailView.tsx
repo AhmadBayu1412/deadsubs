@@ -78,7 +78,7 @@ export function SubscriptionDetailView() {
   return (
     <div className="space-y-6">
       {/* Header with back button */}
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-3">
           <button
             onClick={vm.navigateBack}
@@ -132,7 +132,7 @@ export function SubscriptionDetailView() {
               <p className="text-sm text-secondary">{CATEGORY_LABELS[sub.category]}</p>
             </div>
           </div>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 xs:grid-cols-3 gap-3">
             <InfoCard
               label="Cost"
               value={`$${(sub.cost / 100).toFixed(2)}`}

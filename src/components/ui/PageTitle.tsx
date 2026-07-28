@@ -20,13 +20,13 @@ export function PageTitle({
 }: PageTitleProps) {
   return (
     <div
-      className={clsx('flex items-start justify-between gap-4 mb-6', className)}
+      className={clsx('flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-6', className)}
       {...props}
     >
       <div>
-        <h1 className="text-2xl font-bold text-primary">{title}</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-primary">{title}</h1>
         {description && (
-          <p className="text-sm text-secondary mt-1">{description}</p>
+          <p className="text-xs sm:text-sm text-secondary mt-0.5">{description}</p>
         )}
       </div>
       {action && <div className="flex items-center gap-2 flex-shrink-0">{action}</div>}

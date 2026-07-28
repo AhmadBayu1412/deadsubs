@@ -30,7 +30,7 @@ export function SettingsView() {
   };
 
   return (
-    <div className="space-y-6 max-w-lg">
+    <div className="space-y-6 max-w-lg mx-auto sm:mx-0">
       <PageTitle title="Settings" />
 
       {/* Account section */}
@@ -77,7 +77,7 @@ export function SettingsView() {
           <Trash2 className="w-4 h-4" />
           Danger zone
         </h2>
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div>
             <p className="text-sm font-medium text-primary">Clear all data</p>
             <p className="text-xs text-secondary mt-0.5">

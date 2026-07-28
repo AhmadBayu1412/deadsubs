@@ -7,7 +7,7 @@ export function Main() {
   const outlet = useOutlet();
 
   return (
-    <main className="flex-1 overflow-auto">
+    <main className="flex-1 overflow-auto pb-20 lg:pb-0">
       <Container size="lg" className="py-6 lg:py-8">
         {outlet}
       </Container>

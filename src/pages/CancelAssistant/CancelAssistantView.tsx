@@ -66,7 +66,7 @@ export function CancelAssistantView() {
           return (
             <Card key={sub.id} padding="none">
               <CardContent className="p-4">
-                <div className="flex items-start justify-between gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap mb-2">
                       <h3 className="text-sm font-semibold text-primary">{sub.name}</h3>
@@ -81,7 +81,7 @@ export function CancelAssistantView() {
                       <p className="text-xs text-secondary mt-1">{sub.notes}</p>
                     )}
                   </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
+                  <div className="flex items-center gap-2 flex-shrink-0 flex-wrap">
                     <Button
                       variant="secondary"
                       size="sm"

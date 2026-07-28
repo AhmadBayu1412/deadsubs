@@ -203,11 +203,9 @@ function SidebarToggle({ open, onToggle }: { open: boolean; onToggle: () => void
         'w-6 h-12 items-center justify-center',
         'bg-surface border border-border rounded-r-lg shadow-md',
         'text-secondary hover:text-primary hover:bg-border/50 transition-colors duration-200 cursor-pointer',
+        open ? 'left-60' : 'left-0',
+        'transition-all duration-300 ease-in-out',
       )}
-      style={{
-        left: open ? '232px' : '0px',
-        transition: 'left 0.3s ease-in-out, background-color 0.2s, color 0.2s',
-      }}
       aria-label={open ? 'Close sidebar' : 'Open sidebar'}
     >
       <svg
@@ -215,7 +213,8 @@ function SidebarToggle({ open, onToggle }: { open: boolean; onToggle: () => void
         height="12"
         viewBox="0 0 12 12"
         fill="none"
-        style={{ transform: open ? 'rotate(0deg)' : 'rotate(180deg)', transition: 'transform 0.3s ease-in-out' }}
+        className="transition-transform duration-300"
+        style={{ transform: open ? 'rotate(0deg)' : 'rotate(180deg)' }}
       >
         <path
           d="M8 2L4 6L8 10"
@@ -231,7 +230,7 @@ function SidebarToggle({ open, onToggle }: { open: boolean; onToggle: () => void
 
 // ── Bottom Nav (mobile only) ────────────────────────────────────────────────
 
-function BottomNav() {
+function BottomNav({ sidebarOpen }: Readonly<{ sidebarOpen: boolean }>) {
   const location = useLocation();
 
   const items = [
@@ -244,7 +243,16 @@ function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 inset-x-0 z-30 bg-surface border-t border-border lg:hidden"
+      className={clsx(
+        'fixed z-30 bg-surface border-t border-border',
+        'lg:hidden',
+        'bottom-0 inset-x-0',
+        'transition-all duration-300 ease-in-out',
+      )}
+      style={{
+        left: sidebarOpen ? '240px' : '0',
+        width: sidebarOpen ? 'calc(100% - 240px)' : '100%',
+      }}
       aria-label="Mobile navigation"
     >
       <div className="flex items-center">
@@ -285,17 +293,15 @@ export function AppLayout() {
         className={clsx(
           'flex-1 flex flex-col min-w-0',
           'transition-all duration-300 ease-in-out',
+          'lg:ml-60',
+          !sidebarOpen && 'lg:ml-0',
         )}
-        style={{
-          marginLeft: sidebarOpen ? '240px' : '0px',
-          transition: 'margin-left 0.3s ease-in-out',
-        }}
       >
         <Header onMenuToggle={() => setSidebarOpen(true)} sidebarOpen={sidebarOpen} />
         <Main />
         <Footer />
       </div>
-      <BottomNav />
+      <BottomNav sidebarOpen={sidebarOpen} />
     </div>
   );
 }
