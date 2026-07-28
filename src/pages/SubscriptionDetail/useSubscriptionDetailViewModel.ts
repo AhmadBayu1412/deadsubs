@@ -64,7 +64,7 @@ export function useSubscriptionDetailViewModel(): SubscriptionDetailViewModel {
   const handleCancelSubscription = useCallback(async () => {
     if (!id) return;
     await cancelSubscription(id);
-    navigate('/subscriptions');
+    navigate('/cancel-assistant');
   }, [id, cancelSubscription, navigate]);
 
   const navigateBack = useCallback(() => navigate('/subscriptions'), [navigate]);

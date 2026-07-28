@@ -45,7 +45,6 @@ function InfoCard({ label, value, accent }: { label: string; value: string; acce
 export function SubscriptionDetailView() {
   const vm = useSubscriptionDetailViewModel();
   const { state } = vm;
-  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   if (state.isLoading) {
@@ -95,7 +94,7 @@ export function SubscriptionDetailView() {
             Edit
           </Button>
           {canCancel && (
-            <Button variant="danger" size="sm" onClick={() => setShowCancelConfirm(true)}>
+            <Button variant="danger" size="sm" onClick={vm.cancelSubscription}>
               Cancel
             </Button>
           )}
@@ -116,13 +115,13 @@ export function SubscriptionDetailView() {
 
       {/* Hero section with category color accent */}
       <div className="relative overflow-hidden rounded-2xl bg-surface border border-border p-5">
-        <div 
+        <div
           className="absolute top-0 left-0 w-2 h-full"
           style={{ backgroundColor: categoryColor }}
         />
         <div className="pl-4">
           <div className="flex items-center gap-3 mb-4">
-            <div 
+            <div
               className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-lg"
               style={{ backgroundColor: categoryColor }}
             >
@@ -182,10 +181,10 @@ export function SubscriptionDetailView() {
 
       {/* Action buttons */}
       <div className="flex justify-end pt-2">
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={() => setShowDeleteConfirm(true)} 
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setShowDeleteConfirm(true)}
           className="text-accent-red hover:bg-accent-red/10"
         >
           Delete subscription
@@ -200,21 +199,6 @@ export function SubscriptionDetailView() {
           onCancel={() => vm.setOpenEdit(false)}
         />
       </Modal>
-
-      {/* Cancel confirmation dialog */}
-      <ConfirmDialog
-        open={showCancelConfirm}
-        onClose={() => setShowCancelConfirm(false)}
-        onConfirm={async () => {
-          await vm.cancelSubscription();
-          setShowCancelConfirm(false);
-        }}
-        title="Cancel Subscription"
-        message={`Are you sure you want to cancel ${sub.name}? This subscription will be moved to the Cancel Assistant for tracking.`}
-        confirmLabel="Cancel Subscription"
-        confirmVariant="danger"
-        confirmText="cancel"
-      />
 
       {/* Delete confirmation dialog */}
       <ConfirmDialog
