@@ -30,6 +30,28 @@ import { useAnalyticsViewModel } from './useAnalyticsViewModel';
 import { CATEGORY_COLORS, BILLING_CYCLE_LABELS } from '../../types/subscription';
 import { formatCents } from '../../services/analyticsService';
 
+// Custom tooltip for bar chart
+function CategoryTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number }>; label?: string }) {
+  if (!active || !payload || !payload.length) return null;
+  return (
+    <div className="bg-[#1A1916] border border-[#3A3A35] rounded-lg px-3 py-2 text-xs text-[#F8F7F4] shadow-lg">
+      <p className="font-medium mb-1">{label}</p>
+      <p className="text-[#78756E]">Monthly: <span className="text-[#F8F7F4]">${payload[0].value.toFixed(2)}</span></p>
+    </div>
+  );
+}
+
+// Custom tooltip for area chart
+function RenewalTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number }>; label?: string }) {
+  if (!active || !payload || !payload.length) return null;
+  return (
+    <div className="bg-[#1A1916] border border-[#3A3A35] rounded-lg px-3 py-2 text-xs text-[#F8F7F4] shadow-lg">
+      <p className="font-medium mb-1">{label}</p>
+      <p className="text-[#78756E]">Renewals: <span className="text-[#F8F7F4]">{payload[0].value}</span></p>
+    </div>
+  );
+}
+
 function StatCard({
   label,
   value,
@@ -181,26 +203,17 @@ export function AnalyticsView() {
                     <BarChart data={chartData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
                       <XAxis
                         dataKey="name"
-                        tick={{ fontSize: 11, fill: '#9CA3AF' }}
+                        tick={{ fontSize: 11, fill: '#78756E' }}
                         axisLine={false}
                         tickLine={false}
                       />
                       <YAxis
-                        tick={{ fontSize: 11, fill: '#9CA3AF' }}
+                        tick={{ fontSize: 11, fill: '#78756E' }}
                         axisLine={false}
                         tickLine={false}
                         tickFormatter={(v: number) => `$${v}`}
                       />
-                      <Tooltip
-                        formatter={(v: unknown) => [`$${Number(v).toFixed(2)}`, 'Monthly']}
-                        contentStyle={{
-                          background: '#1A1916',
-                          border: '1px solid #3A3A35',
-                          borderRadius: '8px',
-                          color: '#F8F7F4',
-                          fontSize: '12px',
-                        }}
-                      />
+                      <Tooltip content={<CategoryTooltip />} />
                       <Bar dataKey="monthly" radius={[4, 4, 0, 0]}>
                         {chartData.map((entry) => (
                           <Cell
@@ -250,27 +263,18 @@ export function AnalyticsView() {
                       </defs>
                       <XAxis
                         dataKey="label"
-                        tick={{ fontSize: 10, fill: '#9CA3AF' }}
+                        tick={{ fontSize: 10, fill: '#78756E' }}
                         axisLine={false}
                         tickLine={false}
                         interval={4}
                       />
                       <YAxis
-                        tick={{ fontSize: 10, fill: '#9CA3AF' }}
+                        tick={{ fontSize: 10, fill: '#78756E' }}
                         axisLine={false}
                         tickLine={false}
                         allowDecimals={false}
                       />
-                      <Tooltip
-                        formatter={(v: unknown) => [`${String(v)} renewals`, 'Count']}
-                        contentStyle={{
-                          background: '#1A1916',
-                          border: '1px solid #3A3A35',
-                          borderRadius: '8px',
-                          color: '#F8F7F4',
-                          fontSize: '12px',
-                        }}
-                      />
+                      <Tooltip content={<RenewalTooltip />} />
                       <Area
                         type="monotone"
                         dataKey="count"

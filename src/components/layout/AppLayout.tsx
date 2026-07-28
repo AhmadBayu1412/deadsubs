@@ -203,9 +203,11 @@ function SidebarToggle({ open, onToggle }: { open: boolean; onToggle: () => void
         'w-6 h-12 items-center justify-center',
         'bg-surface border border-border rounded-r-lg shadow-md',
         'text-secondary hover:text-primary hover:bg-border/50 transition-colors duration-200 cursor-pointer',
-        open ? 'left-60' : 'left-0',
-        'transition-all duration-300 ease-in-out',
       )}
+      style={{
+        left: open ? '232px' : '0px',
+        transition: 'left 0.3s ease-in-out, background-color 0.2s, color 0.2s',
+      }}
       aria-label={open ? 'Close sidebar' : 'Open sidebar'}
     >
       <svg
@@ -213,8 +215,7 @@ function SidebarToggle({ open, onToggle }: { open: boolean; onToggle: () => void
         height="12"
         viewBox="0 0 12 12"
         fill="none"
-        className="transition-transform duration-300"
-        style={{ transform: open ? 'rotate(0deg)' : 'rotate(180deg)' }}
+        style={{ transform: open ? 'rotate(0deg)' : 'rotate(180deg)', transition: 'transform 0.3s ease-in-out' }}
       >
         <path
           d="M8 2L4 6L8 10"
@@ -230,7 +231,7 @@ function SidebarToggle({ open, onToggle }: { open: boolean; onToggle: () => void
 
 // ── Bottom Nav (mobile only) ────────────────────────────────────────────────
 
-function BottomNav({ sidebarOpen }: Readonly<{ sidebarOpen: boolean }>) {
+function BottomNav({ sidebarOpen }: { sidebarOpen: boolean }) {
   const location = useLocation();
 
   const items = [
@@ -293,9 +294,11 @@ export function AppLayout() {
         className={clsx(
           'flex-1 flex flex-col min-w-0',
           'transition-all duration-300 ease-in-out',
-          'lg:ml-60',
-          !sidebarOpen && 'lg:ml-0',
         )}
+        style={{
+          marginLeft: sidebarOpen ? '240px' : '0px',
+          transition: 'margin-left 0.3s ease-in-out',
+        }}
       >
         <Header onMenuToggle={() => setSidebarOpen(true)} sidebarOpen={sidebarOpen} />
         <Main />
